@@ -152,7 +152,7 @@
     let s = `<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="arrow"/></marker><marker id="arf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="arrow-f"/></marker><marker id="arx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="arrow-x"/></marker></defs>`;
     const FK = {region:'f-region', net:'f-net', zone:'f-zone', band:'f-band', group:'grp', onprem:'f-onprem', plain:'f-sub'};
     D.frames.filter(shown).forEach(f => {
-      const fc = (FK[f.kind]||'f-sub') + (hl.has(f.id)||FP.on.has(f.id)?' hl':'') + (sel&&sel.id===f.id?' sel':'');
+      const fc = (FK[f.kind]||'f-sub') + (FP.bad===f.id?' fbad':(hl.has(f.id)||FP.on.has(f.id)?' hl':'')) + (sel&&sel.id===f.id?' sel':'');
       s += box(f.x,f.y,f.w,f.h,fc, f.kind==='band'?6:8);
       const lab = pv(f.label);
       if (lab){

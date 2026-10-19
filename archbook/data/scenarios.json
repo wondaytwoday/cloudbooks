@@ -159,6 +159,33 @@
       "file": "chapters/17-internal-only.html",
       "title": "사내 전용 관리자 페이지",
       "question": "인터넷에 노출하지 않고 사내망에서만 접속하게 하려면?"
+    },
+    {
+      "no": 18,
+      "id": "fixed-ip",
+      "level": "network",
+      "status": "published",
+      "file": "chapters/18-fixed-ip.html",
+      "title": "파트너가 고정 IP를 요구할 때",
+      "question": "나가는 IP를 고정하고 들어오는 웹훅은 파트너 IP만 받으려면?"
+    },
+    {
+      "no": 19,
+      "id": "service-to-service",
+      "level": "network",
+      "status": "published",
+      "file": "chapters/19-service-to-service.html",
+      "title": "서비스 간 내부 통신",
+      "question": "같은 VPC의 서비스끼리, 다른 팀 VPC의 서비스와는 어떻게 통신을 열까?"
+    },
+    {
+      "no": 20,
+      "id": "private-services",
+      "level": "network",
+      "status": "published",
+      "file": "chapters/20-private-services.html",
+      "title": "관리형 서비스로 가는 비공개 경로",
+      "question": "VPC 안에서 스토리지·시크릿·레지스트리를 인터넷 없이 쓰려면?"
     }
   ]
 }

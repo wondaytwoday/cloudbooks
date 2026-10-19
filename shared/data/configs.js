@@ -534,5 +534,18 @@ window.CONFIGS = {
     azure: { name:'VNet 피어링', scope:'VNet 두 개 (양방향 연결 두 개)', where:'양쪽 VNet',
       steps:['양쪽 VNet에서 피어링 연결을 만듭니다(포털은 한 번에 둘 다 생성).','가상 네트워크 접근 허용, 전달된 트래픽 허용, 게이트웨이 전송 옵션을 정합니다.','상대 주소 공간이 시스템 경로로 자동 추가됩니다.','피어링은 전이되지 않으므로 스포크끼리는 허브 방화벽으로 UDR을 걸어 통신시킵니다.'],
       fields:[['허브 → 스포크','게이트웨이 전송 허용',''],['스포크 → 허브','원격 게이트웨이 사용',''],['전달된 트래픽','허용','방화벽 경유 시'],['경로','상대 주소 공간 (자동)','']],
-      tf:['azurerm_virtual_network_peering'], note:'피어링 시스템 경로는 UDR의 더 넓은 대역(예: 10.0.0.0/8)보다 구체적이라 방화벽을 우회할 수 있습니다.' } }
+      tf:['azurerm_virtual_network_peering'], note:'피어링 시스템 경로는 UDR의 더 넓은 대역(예: 10.0.0.0/8)보다 구체적이라 방화벽을 우회할 수 있습니다.' } },
+  privsvc: { title: '내 서비스를 비공개로 내주기',
+    aws: { name:'VPC 엔드포인트 서비스 (PrivateLink)', scope:'리전 · 생산자 VPC', where:'생산자 계정',
+      steps:['서비스 앞에 Network Load Balancer(또는 Gateway LB)를 둡니다.','NLB로 엔드포인트 서비스를 만들고 허용 주체(소비자 계정·역할)를 지정합니다. 수락 필요 여부를 정합니다.','소비자는 자기 VPC에 인터페이스 엔드포인트를 만들어 서비스 이름으로 연결합니다.','소비자 엔드포인트의 보안 그룹, 생산자 NLB 대상의 보안 그룹을 각각 엽니다.'],
+      fields:[['로드밸런서','NLB (내부)',''],['허용 주체','arn:aws:iam::111122223333:root',''],['수락 필요','예',''],['비공개 DNS 이름','payments.internal.example.com','도메인 소유 확인']],
+      tf:['aws_vpc_endpoint_service','aws_vpc_endpoint (소비자)'], note:'소비자 쪽 엔드포인트 IP는 소비자 VPC 대역에서 나오므로 두 VPC의 CIDR이 겹쳐도 됩니다. 연결은 소비자 → 생산자 한 방향입니다.' },
+    gcp: { name:'Private Service Connect 서비스 연결', scope:'리전 · 생산자 VPC', where:'생산자 프로젝트',
+      steps:['서비스 앞에 내부 부하 분산기(패스스루 또는 Application)를 둡니다.','PSC용 NAT 서브넷(purpose PRIVATE_SERVICE_CONNECT)을 만듭니다. 소비자 트래픽의 출발지가 이 대역으로 바뀝니다.','서비스 연결(service attachment)을 만들고 연결 승인 방식(자동·명시 승인 목록)을 정합니다.','생산자 방화벽에서 PSC NAT 대역을 백엔드로 허용합니다.','소비자는 자기 VPC에 PSC 엔드포인트(내부 IP 전달 규칙)를 만듭니다.'],
+      fields:[['NAT 서브넷','10.99.0.0/24 (PSC)',''],['승인','명시 승인: orders 프로젝트',''],['프록시 프로토콜','선택','원래 소비자 정보 전달'],['소비자 엔드포인트','10.20.30.5','']],
+      tf:['google_compute_subnetwork (PRIVATE_SERVICE_CONNECT)','google_compute_service_attachment','google_compute_forwarding_rule (소비자)'], note:'생산자는 소비자 IP 대신 PSC NAT 대역을 봅니다. 방화벽에 이 대역을 빠뜨리기 쉽습니다.' },
+    azure: { name:'Private Link 서비스', scope:'지역 · 생산자 VNet', where:'생산자 구독',
+      steps:['서비스 앞에 Standard 내부 Load Balancer를 둡니다.','Private Link 서비스를 만들고 NAT IP 구성(생산자 서브넷)을 지정합니다. 그 서브넷의 Private Link 서비스 네트워크 정책을 끕니다.','공개 범위·자동 승인 구독을 정합니다.','소비자는 자기 VNet에 Private Endpoint를 만들어 별칭이나 리소스 ID로 연결을 요청하고, 생산자가 승인합니다.'],
+      fields:[['로드밸런서','Standard 내부 LB',''],['NAT IP','snet-pls 10.20.40.10',''],['자동 승인','orders 구독',''],['TCP 프록시 v2','선택','원래 소비자 IP 전달']],
+      tf:['azurerm_lb','azurerm_private_link_service','azurerm_private_endpoint (소비자)'], note:'생산자 백엔드가 보는 출발지는 NAT IP입니다. 소비자 → 생산자 한 방향이며 주소 공간이 겹쳐도 됩니다.' } }
 };

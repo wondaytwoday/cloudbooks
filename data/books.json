@@ -10,7 +10,7 @@
       "status": "published",
       "path": "archbook/",
       "icon": "net",
-      "description": "실제 구축 시나리오 하나를 세 클라우드에 나란히 설계합니다. 도면, 장애 시뮬레이션, 리소스 매핑, Terraform까지."
+      "description": "실제 구축 시나리오를 세 클라우드에 나란히 설계합니다. 도면에서 실제 설정 보기, 통신 경로 추적, 구축 순서 비교, Terraform까지."
     },
     {
       "id": "awsbook",
