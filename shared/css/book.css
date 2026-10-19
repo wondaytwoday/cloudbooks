@@ -201,3 +201,24 @@ a{color:var(--accent-ink)}
 
 /* 로딩 실패 안내 */
 .load-err{padding:14px 16px;color:var(--warn);font-size:14px}
+
+/* 시나리오 엔진 공용 */
+.is-down{opacity:.35}
+.e.dead{opacity:.25}
+.f-onprem{fill:var(--paper);stroke:var(--ink);stroke-width:1.2;stroke-dasharray:3 3}
+.bad{color:var(--fail)!important;font-weight:600}
+.big.bad{color:var(--fail)}
+.av tr.cur td{background:var(--accent-soft)}
+.av td{vertical-align:top}
+.chart{display:block;width:100%;height:auto;margin-top:10px}
+.chart .cg{stroke:var(--grid);stroke-width:1}
+.chart .ct{font:11px var(--f-mono);fill:var(--muted)}
+.chart .cl{fill:none;stroke-width:2}
+.chart .ca{stroke:none;opacity:.18}
+.chart .cl.s1{stroke:var(--accent-ink)} .chart .ca.s1{fill:var(--accent)}
+.chart .cl.s2{stroke:var(--fail)} .chart .ca.s2{fill:var(--fail)}
+.ckey{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:4px}
+.ckey i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:3px;margin-right:5px}
+.ckey i.s1{background:var(--accent-ink)} .ckey i.s2{background:var(--fail)}
+.lab-sub,.lab-s{font-size:11px}
+.lab-e{font-size:11px;fill:var(--muted);paint-order:stroke;stroke:var(--sheet);stroke-width:4px;stroke-linejoin:round}

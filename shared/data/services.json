@@ -271,6 +271,420 @@
         "name": "Korea Central",
         "scope": ""
       }
+    },
+    {
+      "id": "api-gateway",
+      "role": "API 게이트웨이",
+      "icon": "apigw",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "API Gateway",
+        "scope": "HTTP API · REST API"
+      },
+      "gcp": {
+        "name": "API Gateway",
+        "scope": "또는 LB 경로 규칙"
+      },
+      "azure": {
+        "name": "API Management",
+        "scope": "Consumption 등 계층"
+      }
+    },
+    {
+      "id": "serverless-compute",
+      "role": "서버리스 실행",
+      "icon": "func",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Lambda",
+        "scope": "실행 환경당 요청 1개"
+      },
+      "gcp": {
+        "name": "Cloud Run",
+        "scope": "인스턴스당 여러 요청"
+      },
+      "azure": {
+        "name": "Azure Functions",
+        "scope": "Flex Consumption"
+      }
+    },
+    {
+      "id": "nosql",
+      "role": "NoSQL",
+      "icon": "nosql",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "DynamoDB",
+        "scope": "키-값·문서"
+      },
+      "gcp": {
+        "name": "Firestore",
+        "scope": "문서"
+      },
+      "azure": {
+        "name": "Cosmos DB",
+        "scope": "여러 API · RU 단위 처리량"
+      }
+    },
+    {
+      "id": "user-auth",
+      "role": "최종 사용자 인증",
+      "icon": "auth",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Cognito",
+        "scope": "사용자 풀"
+      },
+      "gcp": {
+        "name": "Identity Platform",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Entra External ID",
+        "scope": ""
+      }
+    },
+    {
+      "id": "org-root",
+      "role": "조직 최상위",
+      "icon": "org",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "AWS Organizations",
+        "scope": "관리 계정 + 루트"
+      },
+      "gcp": {
+        "name": "조직 (Organization)",
+        "scope": "도메인에 연결"
+      },
+      "azure": {
+        "name": "테넌트 루트 관리 그룹",
+        "scope": "Entra 테넌트 아래"
+      }
+    },
+    {
+      "id": "grouping",
+      "role": "묶음 단위",
+      "icon": "org",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "조직 단위 (OU)",
+        "scope": "정책 상속"
+      },
+      "gcp": {
+        "name": "폴더",
+        "scope": "정책·IAM 상속"
+      },
+      "azure": {
+        "name": "관리 그룹",
+        "scope": "정책·RBAC 상속"
+      }
+    },
+    {
+      "id": "account-unit",
+      "role": "리소스가 사는 단위",
+      "icon": "account",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "계정",
+        "scope": "권한·과금·할당량 경계"
+      },
+      "gcp": {
+        "name": "프로젝트",
+        "scope": "API·할당량·과금 경계"
+      },
+      "azure": {
+        "name": "구독 · 리소스 그룹",
+        "scope": "과금·할당량 경계 · 수명 주기 단위"
+      }
+    },
+    {
+      "id": "guardrail",
+      "role": "가드레일",
+      "icon": "guard",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "서비스 제어 정책 (SCP)",
+        "scope": "관리 계정에는 미적용"
+      },
+      "gcp": {
+        "name": "조직 정책",
+        "scope": "조직 정책 관리자만 변경"
+      },
+      "azure": {
+        "name": "Azure Policy",
+        "scope": "거부·감사·수정 효과"
+      }
+    },
+    {
+      "id": "sso",
+      "role": "사람 로그인",
+      "icon": "iam",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "IAM Identity Center",
+        "scope": "권한 세트"
+      },
+      "gcp": {
+        "name": "Cloud Identity · Workforce Identity",
+        "scope": "그룹 단위 역할"
+      },
+      "azure": {
+        "name": "Microsoft Entra ID",
+        "scope": "Azure RBAC"
+      }
+    },
+    {
+      "id": "org-audit",
+      "role": "조직 감사 로그",
+      "icon": "audit",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "CloudTrail 조직 추적",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cloud Audit Logs · 집계 싱크",
+        "scope": ""
+      },
+      "azure": {
+        "name": "활동 로그 · 진단 설정",
+        "scope": ""
+      }
+    },
+    {
+      "id": "network-hub",
+      "role": "네트워크 허브",
+      "icon": "router",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Transit Gateway",
+        "scope": "또는 RAM 서브넷 공유"
+      },
+      "gcp": {
+        "name": "Shared VPC",
+        "scope": "호스트 프로젝트가 소유"
+      },
+      "azure": {
+        "name": "허브-스포크 VNet",
+        "scope": "피어링 · Virtual WAN"
+      }
+    },
+    {
+      "id": "sec-posture",
+      "role": "보안 현황 집계",
+      "icon": "sechub",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Security Hub · GuardDuty",
+        "scope": "위임 관리자 계정"
+      },
+      "gcp": {
+        "name": "Security Command Center",
+        "scope": "조직 수준"
+      },
+      "azure": {
+        "name": "Microsoft Defender for Cloud",
+        "scope": ""
+      }
+    },
+    {
+      "id": "cost-mgmt",
+      "role": "비용 배분",
+      "icon": "cost",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Cost Explorer · 비용 할당 태그",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cloud Billing · 라벨",
+        "scope": "BigQuery 내보내기"
+      },
+      "azure": {
+        "name": "Cost Management · 태그",
+        "scope": ""
+      }
+    },
+    {
+      "id": "k8s-managed",
+      "role": "관리형 쿠버네티스",
+      "icon": "k8s",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "EKS",
+        "scope": "Auto Mode 선택 가능"
+      },
+      "gcp": {
+        "name": "GKE",
+        "scope": "Standard · Autopilot"
+      },
+      "azure": {
+        "name": "AKS",
+        "scope": "Standard 계층 · Automatic"
+      }
+    },
+    {
+      "id": "node-autoscale",
+      "role": "노드 확장",
+      "icon": "autoscale",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Karpenter · Cluster Autoscaler",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "클러스터 오토스케일러 · 노드 자동 프로비저닝",
+        "scope": ""
+      },
+      "azure": {
+        "name": "클러스터 오토스케일러 · 노드 자동 프로비저닝",
+        "scope": ""
+      }
+    },
+    {
+      "id": "k8s-ingress",
+      "role": "쿠버네티스 진입점",
+      "icon": "lb",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "AWS Load Balancer Controller",
+        "scope": "ALB · NLB"
+      },
+      "gcp": {
+        "name": "GKE Gateway 컨트롤러",
+        "scope": "관리형 Application LB"
+      },
+      "azure": {
+        "name": "Application Gateway for Containers",
+        "scope": "Gateway API · Ingress"
+      }
+    },
+    {
+      "id": "container-registry",
+      "role": "컨테이너 레지스트리",
+      "icon": "registry",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "ECR",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Artifact Registry",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure Container Registry",
+        "scope": ""
+      }
+    },
+    {
+      "id": "pod-identity",
+      "role": "파드 단위 권한",
+      "icon": "iam",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "EKS Pod Identity · IRSA",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Workload Identity Federation for GKE",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Microsoft Entra Workload ID",
+        "scope": "관리 ID 페더레이션"
+      }
+    },
+    {
+      "id": "change-feed",
+      "role": "DB 변경 스트림",
+      "icon": "stream",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "DynamoDB Streams",
+        "scope": "EventBridge Pipes로 연결"
+      },
+      "gcp": {
+        "name": "Firestore 트리거 (Eventarc)",
+        "scope": "관계형은 아웃박스"
+      },
+      "azure": {
+        "name": "Cosmos DB 변경 피드",
+        "scope": "Functions 트리거"
+      }
+    },
+    {
+      "id": "event-bus",
+      "role": "이벤트 버스",
+      "icon": "eventbus",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "EventBridge",
+        "scope": "규칙으로 라우팅"
+      },
+      "gcp": {
+        "name": "Eventarc",
+        "scope": "CloudEvents 형식"
+      },
+      "azure": {
+        "name": "Event Grid",
+        "scope": "토픽·구독"
+      }
+    },
+    {
+      "id": "pubsub-topic",
+      "role": "게시·구독 토픽",
+      "icon": "topic",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "SNS",
+        "scope": "팬아웃"
+      },
+      "gcp": {
+        "name": "Pub/Sub 토픽",
+        "scope": "구독마다 사본"
+      },
+      "azure": {
+        "name": "Service Bus 토픽",
+        "scope": "구독마다 사본"
+      }
+    },
+    {
+      "id": "message-queue",
+      "role": "메시지 큐",
+      "icon": "queue",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "SQS",
+        "scope": "표준 · FIFO · DLQ"
+      },
+      "gcp": {
+        "name": "Pub/Sub 구독 · Cloud Tasks",
+        "scope": "데드 레터 토픽"
+      },
+      "azure": {
+        "name": "Service Bus 큐",
+        "scope": "DLQ 내장 · 세션"
+      }
+    },
+    {
+      "id": "workflow",
+      "role": "워크플로 오케스트레이션",
+      "icon": "workflow",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Step Functions",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Workflows",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Durable Functions · Logic Apps",
+        "scope": ""
+      }
     }
   ]
 }
