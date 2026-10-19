@@ -60,7 +60,7 @@ function node(x,y,w,h,l1,l2,cls,ic){
     const t = Math.min(24,h-8);
     const src = (ICON_SRC[vendor]||{})[ic];
     if (src) s += `<image href="${src}" x="${x+5}" y="${y+(h-t)/2}" width="${t}" height="${t}"/>`;
-    else s += rect(x+5,y+(h-t)/2,t,t,'ic-bg',5) + `<use href="#g-${ic}" class="gl" x="${x+5+t*0.14}" y="${y+(h-t)/2+t*0.14}" width="${t*0.72}" height="${t*0.72}"/>`;
+    else s += rect(x+5,y+(h-t)/2,t,t,'ic-bg',5) + `<use href="#g-${CloudIcons.glyph(ic)}" class="gl" x="${x+5+t*0.14}" y="${y+(h-t)/2+t*0.14}" width="${t*0.72}" height="${t*0.72}"/>`;
     tx = x+t+11; an = 'start';
   }
   if (l2){ s += txt(tx,y+h/2-2,l1,'lab-n',an) + txt(tx,y+h/2+12,l2,'lab-sub',an); }
@@ -78,7 +78,7 @@ function render(){
   // 바깥: 사용자, 엣지
   s += node(280,8,120,32,'사용자',null,'','users');
   s += node(140,66,180,40,'DNS',v.dns,'alt','dns');
-  s += node(360,66,190,40,'CDN · WAF',v.edge,'alt','edge');
+  s += node(360,66,190,40,'CDN · WAF',v.edge,'alt','cdn');
   // 리전 · 네트워크
   s += rect(20,126,640,452,'f-region',10) + txt(34,146,'서울 리전 · '+v.region,'lab-z');
   s += rect(34,156,612,334,'f-net',8) + txt(46,172,v.net,'lab-acc');
@@ -298,12 +298,12 @@ function setVendor(v){
   document.body.dataset.vendor = v;
   try{ localStorage.setItem('archbook-vendor', v); }catch(e){}
   document.querySelectorAll('#vendorSeg button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===v));
-  render(); renderMap(); renderDec(); renderCode();
+  render(); renderMap(); renderDec(); renderCode(); renderLegend();
 }
 document.querySelectorAll('#vendorSeg button').forEach(b=>b.addEventListener('click',()=>setVendor(b.dataset.v)));
 $('failBtn').addEventListener('click',()=>{ failA=!failA; render(); });
 
-document.getElementById('legend').innerHTML = [['users','사용자'],['dns','DNS'],['edge','CDN·WAF'],['lb','로드밸런서'],['nat','NAT'],['vm','앱 서버'],['db','DB'],['obj','오브젝트'],['cache','캐시'],['secret','시크릿'],['mon','모니터링']].map(([k,t])=>`<span>${CloudIcons.tile(k)}${t}</span>`).join('');
+function renderLegend(){ document.getElementById('legend').innerHTML = [['users','사용자'],['dns','DNS'],['cdn','CDN·WAF'],['lb','로드밸런서'],['nat','NAT'],['vm','앱 서버'],['db','DB'],['obj','오브젝트'],['cache','캐시'],['secret','시크릿'],['mon','모니터링']].map(([k,t])=>`<span>${CloudIcons.tile(k)}${t}</span>`).join(''); }
 setVendor(vendor); cap(); av(); renderChk();
 
 // 공유 데이터 불러오기 (저장소 루트 기준 경로)
@@ -313,5 +313,5 @@ fetch(ROOT+'shared/data/services.json').then(r=>{ if(!r.ok) throw 0; return r.js
   MAP_ICONS = d.services.map(s=>s.icon);
 }).catch(()=>{}).finally(renderMap);
 Promise.all(['aws','gcp','azure'].map(v=>fetch(ROOT+CODE[v].f).then(r=>{ if(!r.ok) throw 0; return r.text(); }).then(t=>{ CODE[v].c=t.replace(/\n$/,''); }).catch(()=>{ CODE[v].c=false; }))).then(renderCode);
-CloudIcons.ready.then(render);
+CloudIcons.ready.then(()=>{ render(); renderMap(); renderLegend(); });
 })();

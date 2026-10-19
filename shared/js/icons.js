@@ -23,13 +23,27 @@
   holder.innerHTML = '<svg width="0" height="0" style="position:absolute" aria-hidden="true">' + SYMBOLS + '</svg>';
   document.body.prepend(holder.firstChild);
 
+  /* 공식 아이콘이 없을 때 쓸 자체 선 아이콘 */
+  const GLYPH = {cdn:'edge',waf:'edge',gslb:'lb',igw:'net',gpu:'vm',autoscale:'vm',pg:'db',nosql:'db',files:'obj',kms:'secret',
+    logs:'mon',audit:'mon',privlink:'net',bastion:'secret',apigw:'lb',func:'cache',run:'vm',k8s:'sub',registry:'obj',queue:'nat',
+    topic:'nat',eventbus:'nat',stream:'nat',workflow:'nat',dwh:'db',etl:'nat',query:'db',lakegov:'obj',vpn:'net',dedicated:'net',
+    router:'lb',iam:'secret',org:'pin',account:'pin',guard:'edge',sechub:'edge',backup:'obj',ml:'vm',llm:'vm',search:'dns',
+    auth:'users',cost:'mon',onprem:'vm',client:'users'};
   const base = document.currentScript.src.replace(/js\/icons\.js.*$/, 'icons/');
+  const vendorNow = () => document.body.dataset.vendor;
   window.CloudIcons = {
     src: { aws:{}, gcp:{}, azure:{} },
+    glyph: k => GLYPH[k] || k,
     ready: fetch(base + 'manifest.json').then(r => r.ok ? r.json() : {}).then(m => {
       for (const v of ['aws','gcp','azure']) for (const [k,p] of Object.entries(m[v]||{})) window.CloudIcons.src[v][k] = base + p;
     }).catch(() => {}),
-    /* 범례·표용 작은 타일 */
-    tile(key){ return `<svg class="tile" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5"/><use href="#g-${key}" class="gl" x="3" y="3" width="18" height="18"/></svg>`; }
+    /* 공식 아이콘 경로 (없으면 null) */
+    url(key, v){ v = v || vendorNow(); return (this.src[v] || {})[key] || null; },
+    /* 범례·표용 작은 타일: 공식 아이콘이 있으면 그 이미지, 없으면 자체 아이콘 */
+    tile(key, v){
+      const u = this.url(key, v);
+      if (u) return `<img class="tile" src="${u}" alt="" loading="lazy">`;
+      return `<svg class="tile" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5"/><use href="#g-${GLYPH[key]||key}" class="gl" x="3" y="3" width="18" height="18"/></svg>`;
+    }
   };
 })();

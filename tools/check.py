@@ -18,7 +18,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 STALE_DAYS = 180
 VENDORS = ("aws", "gcp", "azure")
-ICON_KEYS = {"users", "dns", "edge", "lb", "nat", "vm", "db", "obj", "cache", "secret", "mon", "net", "sub", "fw", "pin"}
+_icons_js = (ROOT / "shared/js/icons.js").read_text(encoding="utf-8")
+# 자체 아이콘(스프라이트)과 공식 아이콘 대체 표에 있는 키가 쓸 수 있는 키
+ICON_KEYS = set(re.findall(r'id="g-([a-z]+)"', _icons_js)) | set(
+    re.findall(r"([a-z0-9]+):'[a-z]+'", re.search(r"const GLYPH = \{(.*?)\};", _icons_js, re.S).group(1)))
 
 errors, warnings = [], []
 

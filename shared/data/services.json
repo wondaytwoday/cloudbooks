@@ -59,7 +59,7 @@
     {
       "id": "cdn",
       "role": "CDN",
-      "icon": "edge",
+      "icon": "cdn",
       "checked": "2026-10-19",
       "aws": {
         "name": "CloudFront",
@@ -77,7 +77,7 @@
     {
       "id": "waf",
       "role": "WAF",
-      "icon": "edge",
+      "icon": "waf",
       "checked": "2026-10-19",
       "aws": {
         "name": "AWS WAF",
@@ -113,7 +113,7 @@
     {
       "id": "vm-autoscale",
       "role": "VM 오토스케일",
-      "icon": "vm",
+      "icon": "autoscale",
       "checked": "2026-10-19",
       "aws": {
         "name": "EC2 Auto Scaling 그룹",
