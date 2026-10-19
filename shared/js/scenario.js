@@ -31,7 +31,7 @@
     apigw:'API 게이트웨이',func:'함수',run:'서버리스 컨테이너',k8s:'쿠버네티스',registry:'컨테이너 레지스트리',queue:'큐',topic:'토픽',eventbus:'이벤트 버스',
     stream:'스트림',workflow:'워크플로',dwh:'데이터 웨어하우스',etl:'ETL',query:'서버리스 쿼리',lakegov:'데이터 거버넌스',vpn:'VPN',dedicated:'전용선',
     router:'라우팅 허브',iam:'IAM',org:'조직',account:'계정',guard:'가드레일',sechub:'보안 현황',backup:'백업',ml:'ML 플랫폼',llm:'LLM',search:'벡터 검색',
-    auth:'사용자 인증',cost:'비용',onprem:'온프레미스'};
+    auth:'사용자 인증',cost:'비용',onprem:'온프레미스',gk8s:'쿠버네티스 (공통)',gdb:'DB (공통)',gobj:'스토리지 (공통)'};
 
   let vendor = 'aws', failed = false, MAP = null, CODE = {aws:null, gcp:null, azure:null};
   try{ const s = localStorage.getItem('archbook-vendor'); if (NAMES[s]) vendor = s; }catch(e){}

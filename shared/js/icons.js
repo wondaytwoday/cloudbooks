@@ -28,7 +28,7 @@
     logs:'mon',audit:'mon',privlink:'net',bastion:'secret',apigw:'lb',func:'cache',run:'vm',k8s:'sub',registry:'obj',queue:'nat',
     topic:'nat',eventbus:'nat',stream:'nat',workflow:'nat',dwh:'db',etl:'nat',query:'db',lakegov:'obj',vpn:'net',dedicated:'net',
     router:'lb',iam:'secret',org:'pin',account:'pin',guard:'edge',sechub:'edge',backup:'obj',ml:'vm',llm:'vm',search:'dns',
-    auth:'users',cost:'mon',onprem:'vm',client:'users'};
+    auth:'users',cost:'mon',onprem:'vm',client:'users',gk8s:'sub',gdb:'db',gobj:'obj'};
   const base = document.currentScript.src.replace(/js\/icons\.js.*$/, 'icons/');
   const vendorNow = () => document.body.dataset.vendor;
   window.CloudIcons = {

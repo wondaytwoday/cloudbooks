@@ -100,33 +100,37 @@
       "no": 11,
       "id": "ml-serving",
       "level": "advanced",
-      "status": "planned",
+      "status": "writing",
       "title": "ML 학습과 추론 서빙",
-      "question": "GPU 학습과 저지연 추론을 함께 운영하려면?"
+      "question": "GPU 학습과 저지연 추론을 함께 운영하려면?",
+      "file": "chapters/11-ml-serving.html"
     },
     {
       "no": 12,
       "id": "llm-rag",
       "level": "advanced",
-      "status": "planned",
+      "status": "writing",
       "title": "LLM·RAG 애플리케이션",
-      "question": "벡터 검색과 모델 API를 안전하게 붙이려면?"
+      "question": "벡터 검색과 모델 API를 안전하게 붙이려면?",
+      "file": "chapters/12-llm-rag.html"
     },
     {
       "no": 13,
       "id": "cost-refactor",
       "level": "synthesis",
-      "status": "planned",
+      "status": "writing",
       "title": "비용 최적화 리팩터링",
-      "question": "이미 돌고 있는 시스템의 청구서를 줄이려면?"
+      "question": "이미 돌고 있는 시스템의 청구서를 줄이려면?",
+      "file": "chapters/13-cost-refactor.html"
     },
     {
       "no": 14,
       "id": "multi-cloud",
       "level": "synthesis",
-      "status": "planned",
+      "status": "writing",
       "title": "멀티클라우드는 언제 의미가 있나",
-      "question": "두 클라우드를 함께 쓸 이유와 비용은?"
+      "question": "두 클라우드를 함께 쓸 이유와 비용은?",
+      "file": "chapters/14-multi-cloud.html"
     }
   ]
 }

@@ -1153,6 +1153,348 @@
         "name": "자동 확장 일정 프로필",
         "scope": "App Gateway 최소 인스턴스"
       }
+    },
+    {
+      "id": "ml-platform",
+      "role": "ML 플랫폼",
+      "icon": "ml",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Amazon SageMaker AI",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Vertex AI",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure Machine Learning",
+        "scope": ""
+      }
+    },
+    {
+      "id": "ml-training",
+      "role": "관리형 학습",
+      "icon": "gpu",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "SageMaker 학습 작업",
+        "scope": "관리형 스팟 학습"
+      },
+      "gcp": {
+        "name": "Vertex AI 맞춤 학습",
+        "scope": "스팟 VM · DWS"
+      },
+      "azure": {
+        "name": "Azure ML 컴퓨팅 클러스터",
+        "scope": "저우선순위 VM"
+      }
+    },
+    {
+      "id": "model-registry",
+      "role": "모델 레지스트리",
+      "icon": "ml",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "SageMaker Model Registry",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Vertex AI Model Registry",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure ML 레지스트리",
+        "scope": ""
+      }
+    },
+    {
+      "id": "ml-endpoint",
+      "role": "추론 엔드포인트",
+      "icon": "ml",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "SageMaker 실시간 엔드포인트",
+        "scope": "블루/그린 · 자동 롤백"
+      },
+      "gcp": {
+        "name": "Vertex AI 온라인 엔드포인트",
+        "scope": "트래픽 분할"
+      },
+      "azure": {
+        "name": "관리형 온라인 엔드포인트",
+        "scope": "블루·그린 · 미러링"
+      }
+    },
+    {
+      "id": "feature-store",
+      "role": "피처 저장소",
+      "icon": "nosql",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "SageMaker Feature Store",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Vertex AI Feature Store",
+        "scope": "BigQuery 기반"
+      },
+      "azure": {
+        "name": "Azure ML 피처 저장소",
+        "scope": ""
+      }
+    },
+    {
+      "id": "gpu-capacity",
+      "role": "GPU 용량 확보",
+      "icon": "gpu",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "EC2 용량 블록 · 학습 계획",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "예약 · Dynamic Workload Scheduler",
+        "scope": ""
+      },
+      "azure": {
+        "name": "용량 예약 · 할당량 증설",
+        "scope": ""
+      }
+    },
+    {
+      "id": "llm-api",
+      "role": "생성 모델 API",
+      "icon": "llm",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Amazon Bedrock",
+        "scope": "교차 리전 추론 프로필"
+      },
+      "gcp": {
+        "name": "Vertex AI (Gemini 등)",
+        "scope": "리전 · 글로벌 엔드포인트"
+      },
+      "azure": {
+        "name": "Azure OpenAI · Foundry 모델",
+        "scope": "Standard · Data Zone · Global"
+      }
+    },
+    {
+      "id": "embedding",
+      "role": "임베딩 모델",
+      "icon": "llm",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Bedrock 임베딩 모델",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Vertex AI 임베딩",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure OpenAI 임베딩",
+        "scope": ""
+      }
+    },
+    {
+      "id": "vector-search",
+      "role": "벡터 검색",
+      "icon": "search",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "OpenSearch Serverless (벡터)",
+        "scope": "Aurora pgvector 등"
+      },
+      "gcp": {
+        "name": "Vertex AI Vector Search",
+        "scope": "AlloyDB · Cloud SQL pgvector 등"
+      },
+      "azure": {
+        "name": "Azure AI Search",
+        "scope": "하이브리드 · 시맨틱 재순위"
+      }
+    },
+    {
+      "id": "managed-rag",
+      "role": "관리형 RAG",
+      "icon": "workflow",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Bedrock Knowledge Bases",
+        "scope": "메타데이터 필터"
+      },
+      "gcp": {
+        "name": "Vertex AI RAG Engine · Vertex AI Search",
+        "scope": ""
+      },
+      "azure": {
+        "name": "AI Search 통합 벡터화",
+        "scope": "인덱서 · 스킬셋"
+      }
+    },
+    {
+      "id": "ai-guardrail",
+      "role": "AI 입출력 가드레일",
+      "icon": "waf",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Bedrock Guardrails",
+        "scope": "프롬프트 공격 · 개인정보"
+      },
+      "gcp": {
+        "name": "Model Armor",
+        "scope": "인젝션 · 악성 URL"
+      },
+      "azure": {
+        "name": "Azure AI Content Safety",
+        "scope": "Prompt Shields"
+      }
+    },
+    {
+      "id": "rightsizing",
+      "role": "크기 조정 권장",
+      "icon": "cost",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Compute Optimizer",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Recommender",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure Advisor",
+        "scope": ""
+      }
+    },
+    {
+      "id": "commitment",
+      "role": "약정 할인",
+      "icon": "cost",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Savings Plans · 예약 인스턴스",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "확약 사용 할인 (CUD)",
+        "scope": "지속 사용 할인 자동"
+      },
+      "azure": {
+        "name": "예약 · Azure 절감 플랜",
+        "scope": ""
+      }
+    },
+    {
+      "id": "storage-tiering",
+      "role": "스토리지 계층 자동화",
+      "icon": "obj",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "S3 Intelligent-Tiering · 수명 주기",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Autoclass · 수명 주기",
+        "scope": ""
+      },
+      "azure": {
+        "name": "수명 주기 관리 · 접근 계층",
+        "scope": "마지막 접근 시간 기준"
+      }
+    },
+    {
+      "id": "spot",
+      "role": "스팟 인스턴스",
+      "icon": "vm",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "EC2 스팟",
+        "scope": "회수 2분 전 통지"
+      },
+      "gcp": {
+        "name": "스팟 VM",
+        "scope": "회수 30초 전 통지"
+      },
+      "azure": {
+        "name": "스팟 VM",
+        "scope": "예약 이벤트 30초 전"
+      }
+    },
+    {
+      "id": "vm-schedule",
+      "role": "가동 시간 일정",
+      "icon": "vm",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Instance Scheduler · 예약 작업",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "인스턴스 일정",
+        "scope": ""
+      },
+      "azure": {
+        "name": "VM 자동 종료 · 일정 프로필",
+        "scope": ""
+      }
+    },
+    {
+      "id": "multicloud-mgmt",
+      "role": "다른 환경 함께 관리",
+      "icon": "org",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Systems Manager 하이브리드 · EKS Hybrid Nodes",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "GKE 연결 클러스터 · BigQuery Omni",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure Arc",
+        "scope": "서버 · 쿠버네티스 · 데이터"
+      }
+    },
+    {
+      "id": "cross-cloud-link",
+      "role": "클라우드 간 연결",
+      "icon": "vpn",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Site-to-Site VPN",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cross-Cloud Interconnect · HA VPN",
+        "scope": "물리 전용 연결"
+      },
+      "azure": {
+        "name": "VPN Gateway · ExpressRoute",
+        "scope": ""
+      }
+    },
+    {
+      "id": "iac-native",
+      "role": "클라우드 고유 IaC",
+      "icon": "workflow",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "CloudFormation · CDK",
+        "scope": "Terraform은 공통"
+      },
+      "gcp": {
+        "name": "Infrastructure Manager",
+        "scope": "Terraform 기반"
+      },
+      "azure": {
+        "name": "Bicep · ARM 템플릿",
+        "scope": "Terraform은 공통"
+      }
     }
   ]
 }
