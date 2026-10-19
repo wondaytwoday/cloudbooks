@@ -15,16 +15,16 @@ window.SCENARIO = {
       {id:'region', kind:'region', x:8, y:6, w:664, h:388, label:{aws:'서울 리전 · ap-northeast-2', gcp:'서울 리전 · asia-northeast3', azure:'서울 리전 · Korea Central'}, labelRight:true}
     ],
     nodes: [
-      {id:'lake', x:20, y:34, w:180, h:48, icon:'obj', t:'학습 데이터', s:{aws:'S3', gcp:'Cloud Storage · BigQuery', azure:'ADLS Gen2'}},
+      {id:'lake', cfg:'bucket', x:20, y:34, w:180, h:48, icon:'obj', t:'학습 데이터', s:{aws:'S3', gcp:'Cloud Storage · BigQuery', azure:'ADLS Gen2'}},
       {id:'feat', x:20, y:134, w:180, h:48, icon:'nosql', t:'피처 저장소', s:{aws:'SageMaker Feature Store', gcp:'Vertex AI Feature Store', azure:'Azure ML 피처 저장소'}},
       {id:'pipe', x:228, y:34, w:204, h:48, icon:'workflow', t:'학습 파이프라인', s:{aws:'SageMaker Pipelines', gcp:'Vertex AI Pipelines', azure:'Azure ML 파이프라인'}},
       {id:'train', x:228, y:134, w:204, h:52, icon:'gpu', t:'분산 학습 · GPU 8장', s:{aws:'학습 작업 · 관리형 스팟', gcp:'맞춤 학습 · 스팟 VM', azure:'컴퓨팅 클러스터 · 저우선순위'}},
-      {id:'ckpt', x:228, y:236, w:204, h:44, icon:'obj', t:'체크포인트', s:{aws:'S3', gcp:'Cloud Storage', azure:'Blob Storage'}, kind:'alt'},
+      {id:'ckpt', cfg:'bucket', x:228, y:236, w:204, h:44, icon:'obj', t:'체크포인트', s:{aws:'S3', gcp:'Cloud Storage', azure:'Blob Storage'}, kind:'alt'},
       {id:'reg', x:460, y:34, w:200, h:48, icon:'ml', t:'모델 레지스트리', s:{aws:'SageMaker Model Registry', gcp:'Vertex AI Model Registry', azure:'Azure ML 레지스트리'}},
       {id:'ep', x:460, y:134, w:200, h:52, icon:'ml', t:'추론 엔드포인트', s:{aws:'SageMaker 실시간 엔드포인트', gcp:'Vertex AI 온라인 엔드포인트', azure:'관리형 온라인 엔드포인트'}, kind:'reg'},
       {id:'v1', x:460, y:236, w:96, h:44, icon:'gpu', t:'v12', s:'90%', failS:'100%'},
       {id:'v2', x:564, y:236, w:96, h:44, icon:'gpu', t:'v13', s:'10%', failS:'롤백 → 0%'},
-      {id:'app', x:228, y:330, w:204, h:44, icon:{aws:'apigw', gcp:'run', azure:'apigw'}, t:'추천 API', s:{aws:'API Gateway', gcp:'Cloud Run', azure:'API Management'}},
+      {id:'app', cfg:{aws:'apigw', gcp:'func', azure:'apigw'}, x:228, y:330, w:204, h:44, icon:{aws:'apigw', gcp:'run', azure:'apigw'}, t:'추천 API', s:{aws:'API Gateway', gcp:'Cloud Run', azure:'API Management'}},
       {id:'mon', x:460, y:330, w:200, h:44, icon:'mon', t:'모델 모니터링', s:{aws:'Model Monitor · CloudWatch', gcp:'Vertex AI Model Monitoring', azure:'Azure ML 모델 모니터링'}, kind:'alt'}
     ],
     edges: [
@@ -63,6 +63,36 @@ window.SCENARIO = {
         ['warn','자동 롤백은 Azure Monitor 경보와 자동화 작업으로 직접 연결합니다.']
       ]
     }
+  },
+  scope: ['bucket','apigw','func'],
+  build: {
+    aws: [
+      {t:'SageMaker 도메인 · 실행 역할', d:'VPC 전용 모드 검토', nodes:['pipe']},
+      {t:'S3 학습 데이터·체크포인트 버킷', cfg:'bucket', nodes:['lake','ckpt']},
+      {t:'GPU 할당량 요청', d:'학습·엔드포인트 인스턴스 유형별', nodes:['train']},
+      {t:'Feature Store 피처 그룹', nodes:['feat']},
+      {t:'Pipelines 정의 · 모델 레지스트리', d:'승인 상태로 배포 통제', nodes:['pipe','reg']},
+      {t:'엔드포인트 구성 (변형 2개)', d:'가중치 90/10', nodes:['ep','v1','v2']},
+      {t:'API Gateway → 엔드포인트 호출', cfg:'apigw', nodes:['app']}
+    ],
+    gcp: [
+      {t:'Vertex AI API · 서비스 계정', nodes:['pipe']},
+      {t:'Cloud Storage 버킷', cfg:'bucket', nodes:['lake','ckpt']},
+      {t:'GPU 할당량', d:'리전별 GPU 종류 확인', nodes:['train']},
+      {t:'Feature Store 온라인 저장소', nodes:['feat']},
+      {t:'Pipelines · Model Registry', nodes:['pipe','reg']},
+      {t:'엔드포인트에 모델 2개 배포', d:'트래픽 분할 90/10', nodes:['ep','v1','v2']},
+      {t:'Cloud Run 추천 API', cfg:'func', nodes:['app']}
+    ],
+    azure: [
+      {t:'Azure ML 작업 영역', d:'스토리지·Key Vault·ACR·App Insights 함께 생성', nodes:['pipe']},
+      {t:'ADLS Gen2 · Blob', cfg:'bucket', nodes:['lake','ckpt']},
+      {t:'컴퓨팅 클러스터 + 할당량', d:'저우선순위 VM', nodes:['train']},
+      {t:'피처 저장소', nodes:['feat']},
+      {t:'파이프라인 · 레지스트리', nodes:['pipe','reg']},
+      {t:'관리형 온라인 엔드포인트 + 배포 2개', d:'트래픽 90/10', nodes:['ep','v1','v2']},
+      {t:'API Management', cfg:'apigw', nodes:['app']}
+    ]
   },
   map: ['ml-platform','ml-training','model-registry','ml-endpoint','feature-store','gpu-capacity'],
   decisions: [

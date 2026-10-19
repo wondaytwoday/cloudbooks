@@ -17,14 +17,14 @@ window.SCENARIO = {
     ],
     nodes: [
       {id:'users', x:280, y:6, w:120, h:34, icon:'users', t:'예매 고객', s:''},
-      {id:'edge', x:230, y:60, w:240, h:48, icon:'waf', t:'CDN + WAF', s:{aws:'CloudFront · WAF Bot Control', gcp:'Cloud CDN · Cloud Armor', azure:'Front Door · WAF 봇 관리'}, kind:'reg', failS:'봇·과다 요청 차단 중'},
-      {id:'room', x:20, y:150, w:200, h:52, icon:{aws:'func', gcp:'run', azure:'func'}, t:'가상 대기실', s:{aws:'Virtual Waiting Room on AWS', gcp:'Cloud Run 대기열 서비스', azure:'Functions 대기열 서비스'}, failS:'순번 발급 · 입장 속도 조절'},
-      {id:'tokens', x:20, y:250, w:200, h:48, icon:'nosql', t:'순번·입장 토큰', s:{aws:'DynamoDB', gcp:'Firestore', azure:'Cosmos DB'}},
-      {id:'api', x:252, y:150, w:200, h:48, icon:'autoscale', t:'예매 API', s:{aws:'Auto Scaling · 예약 확장', gcp:'MIG · 확장 일정', azure:'VMSS · 일정 프로필'}, failS:'미리 늘린 용량으로 처리'},
-      {id:'cache', x:462, y:150, w:194, h:48, icon:'cache', t:'좌석 재고 카운터', s:{aws:'ElastiCache · 원자 차감', gcp:'Memorystore · 원자 차감', azure:'Managed Redis · 원자 차감'}},
-      {id:'q', x:252, y:250, w:200, h:48, icon:'queue', t:'주문 대기열', s:{aws:'SQS', gcp:'Pub/Sub', azure:'Service Bus'}},
-      {id:'worker', x:462, y:250, w:194, h:48, icon:{aws:'func', gcp:'run', azure:'func'}, t:'주문 확정', s:'결제 · 좌석 배정'},
-      {id:'db', x:462, y:350, w:194, h:48, icon:'db', t:'예매 DB', s:{aws:'Aurora MySQL', gcp:'Cloud SQL', azure:'MySQL Flexible Server'}},
+      {id:'edge', cfg:'waf', x:230, y:60, w:240, h:48, icon:'waf', t:'CDN + WAF', s:{aws:'CloudFront · WAF Bot Control', gcp:'Cloud CDN · Cloud Armor', azure:'Front Door · WAF 봇 관리'}, kind:'reg', failS:'봇·과다 요청 차단 중'},
+      {id:'room', cfg:'func', x:20, y:150, w:200, h:52, icon:{aws:'func', gcp:'run', azure:'func'}, t:'가상 대기실', s:{aws:'Virtual Waiting Room on AWS', gcp:'Cloud Run 대기열 서비스', azure:'Functions 대기열 서비스'}, failS:'순번 발급 · 입장 속도 조절'},
+      {id:'tokens', cfg:'nosql', x:20, y:250, w:200, h:48, icon:'nosql', t:'순번·입장 토큰', s:{aws:'DynamoDB', gcp:'Firestore', azure:'Cosmos DB'}},
+      {id:'api', cfg:'vmgroup', x:252, y:150, w:200, h:48, icon:'autoscale', t:'예매 API', s:{aws:'Auto Scaling · 예약 확장', gcp:'MIG · 확장 일정', azure:'VMSS · 일정 프로필'}, failS:'미리 늘린 용량으로 처리'},
+      {id:'cache', cfg:'cache', x:462, y:150, w:194, h:48, icon:'cache', t:'좌석 재고 카운터', s:{aws:'ElastiCache · 원자 차감', gcp:'Memorystore · 원자 차감', azure:'Managed Redis · 원자 차감'}},
+      {id:'q', cfg:'queue', x:252, y:250, w:200, h:48, icon:'queue', t:'주문 대기열', s:{aws:'SQS', gcp:'Pub/Sub', azure:'Service Bus'}},
+      {id:'worker', cfg:'func', x:462, y:250, w:194, h:48, icon:{aws:'func', gcp:'run', azure:'func'}, t:'주문 확정', s:'결제 · 좌석 배정'},
+      {id:'db', cfg:'dbha', x:462, y:350, w:194, h:48, icon:'db', t:'예매 DB', s:{aws:'Aurora MySQL', gcp:'Cloud SQL', azure:'MySQL Flexible Server'}},
       {id:'mon', x:252, y:350, w:200, h:48, icon:'mon', t:'실시간 지표', s:'입장 속도 · 큐 깊이', kind:'alt'}
     ],
     edges: [
@@ -64,6 +64,33 @@ window.SCENARIO = {
         ['warn','좌석 재고를 한 행에서 차감하면 잠금이 몰립니다. Redis 원자 연산이나 Cosmos DB 낙관적 동시성(ETag)으로 처리합니다.']
       ]
     }
+  },
+  scope: ['waf','vmgroup','cache','queue','nosql'],
+  build: {
+    aws: [
+      {t:'WAF 웹 ACL + Bot Control', d:'CLOUDFRONT 범위, 속도 제한', cfg:'waf', nodes:['edge']},
+      {t:'가상 대기실 (솔루션 배포)', d:'DynamoDB 토큰, API', cfg:'func', nodes:['room','tokens']},
+      {t:'ElastiCache', d:'원자 차감용 키', cfg:'cache', nodes:['cache']},
+      {t:'SQS 주문 큐 + DLQ', cfg:'queue', nodes:['q']},
+      {t:'예약된 확장', d:'오픈 30분 전 최소 대수 상향', cfg:'vmgroup', nodes:['api']},
+      {t:'주문 확정 워커', d:'동시성 한도 = DB가 견디는 쓰기 수', cfg:'func', nodes:['worker','db']}
+    ],
+    gcp: [
+      {t:'Cloud Armor 정책', d:'rate_based_ban, reCAPTCHA 연동', cfg:'waf', nodes:['edge']},
+      {t:'대기열 서비스 Cloud Run + Firestore', d:'최소 인스턴스로 콜드 스타트 대비', cfg:'func', nodes:['room','tokens']},
+      {t:'Memorystore', cfg:'cache', nodes:['cache']},
+      {t:'Pub/Sub 토픽 + 구독', cfg:'queue', nodes:['q']},
+      {t:'오토스케일러 확장 일정', cfg:'vmgroup', nodes:['api']},
+      {t:'주문 확정 워커', d:'최대 인스턴스로 DB 보호', cfg:'func', nodes:['worker','db']}
+    ],
+    azure: [
+      {t:'Front Door WAF 정책', d:'봇 관리, 속도 제한', cfg:'waf', nodes:['edge']},
+      {t:'대기열 Functions + Cosmos DB', d:'항상 준비 인스턴스', cfg:'func', nodes:['room','tokens']},
+      {t:'Azure Managed Redis', cfg:'cache', nodes:['cache']},
+      {t:'Service Bus 큐', cfg:'queue', nodes:['q']},
+      {t:'자동 크기 조정 일정 프로필', cfg:'vmgroup', nodes:['api']},
+      {t:'주문 확정 워커', d:'동시성 제한', cfg:'func', nodes:['worker','db']}
+    ]
   },
   map: ['cdn','waf-bot','waiting-room','scheduled-scaling','cache','message-queue'],
   decisions: [

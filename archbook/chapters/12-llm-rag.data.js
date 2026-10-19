@@ -16,14 +16,14 @@ window.SCENARIO = {
     ],
     nodes: [
       {id:'users', x:20, y:14, w:140, h:42, icon:'users', t:'직원', s:'SSO 로그인'},
-      {id:'app', x:190, y:10, w:212, h:50, icon:{aws:'func', gcp:'run', azure:'run'}, t:'질의 API', s:{aws:'Lambda · 응답 스트리밍', gcp:'Cloud Run', azure:'Container Apps'}},
-      {id:'guard', x:432, y:10, w:228, h:50, icon:'waf', t:'입출력 가드레일', s:{aws:'Bedrock Guardrails', gcp:'Model Armor', azure:'Content Safety · Prompt Shields'}, failS:'숨은 지시 탐지'},
+      {id:'app', cfg:'func', x:190, y:10, w:212, h:50, icon:{aws:'func', gcp:'run', azure:'run'}, t:'질의 API', s:{aws:'Lambda · 응답 스트리밍', gcp:'Cloud Run', azure:'Container Apps'}},
+      {id:'guard', cfg:{aws:'llm', gcp:'llm', azure:'llm'}, x:432, y:10, w:228, h:50, icon:'waf', t:'입출력 가드레일', s:{aws:'Bedrock Guardrails', gcp:'Model Armor', azure:'Content Safety · Prompt Shields'}, failS:'숨은 지시 탐지'},
       {id:'vec', x:190, y:106, w:212, h:52, icon:'search', t:'벡터 검색 + 권한 필터', s:{aws:'OpenSearch Serverless', gcp:'Vertex AI Vector Search', azure:'Azure AI Search'}, failS:'악성 문서가 결과에 섞임'},
-      {id:'llm', x:432, y:106, w:228, h:52, icon:'llm', t:'생성 모델', s:{aws:'Amazon Bedrock', gcp:'Vertex AI · Gemini', azure:'Azure OpenAI'}},
-      {id:'docs', x:20, y:210, w:140, h:48, icon:'obj', t:'사내 문서', s:{aws:'S3', gcp:'Cloud Storage', azure:'Blob Storage'}},
+      {id:'llm', cfg:'llm', x:432, y:106, w:228, h:52, icon:'llm', t:'생성 모델', s:{aws:'Amazon Bedrock', gcp:'Vertex AI · Gemini', azure:'Azure OpenAI'}},
+      {id:'docs', cfg:'bucket', x:20, y:210, w:140, h:48, icon:'obj', t:'사내 문서', s:{aws:'S3', gcp:'Cloud Storage', azure:'Blob Storage'}},
       {id:'rag', x:190, y:210, w:212, h:48, icon:'workflow', t:'수집·청크·색인', s:{aws:'Bedrock Knowledge Bases', gcp:'Vertex AI RAG Engine', azure:'AI Search 통합 벡터화'}},
-      {id:'emb', x:432, y:210, w:228, h:48, icon:'llm', t:'임베딩 모델', s:{aws:'Bedrock 임베딩 모델', gcp:'Vertex AI 임베딩', azure:'Azure OpenAI 임베딩'}, kind:'alt'},
-      {id:'pe', x:190, y:310, w:212, h:46, icon:'privlink', t:'모델 비공개 호출', s:{aws:'Bedrock VPC 엔드포인트', gcp:'Private Service Connect', azure:'Private Endpoint'}, kind:'alt'},
+      {id:'emb', cfg:'llm', x:432, y:210, w:228, h:48, icon:'llm', t:'임베딩 모델', s:{aws:'Bedrock 임베딩 모델', gcp:'Vertex AI 임베딩', azure:'Azure OpenAI 임베딩'}, kind:'alt'},
+      {id:'pe', cfg:'privlink', x:190, y:310, w:212, h:46, icon:'privlink', t:'모델 비공개 호출', s:{aws:'Bedrock VPC 엔드포인트', gcp:'Private Service Connect', azure:'Private Endpoint'}, kind:'alt'},
       {id:'logs', x:432, y:310, w:228, h:46, icon:'logs', t:'프롬프트·응답 기록', s:{aws:'모델 호출 로깅 → CloudWatch', gcp:'Cloud Logging', azure:'Azure Monitor · 진단 설정'}, kind:'alt'}
     ],
     edges: [
@@ -60,6 +60,37 @@ window.SCENARIO = {
         ['warn','필터는 확률적이라 모든 변형을 막지 못합니다. 모델이 쓸 수 있는 도구와 데이터 권한을 최소로 둡니다.']
       ]
     }
+  },
+  scope: ['llm','privlink','bucket','func'],
+  build: {
+    aws: [
+      {t:'모델 접근 활성화', d:'생성·임베딩 모델', cfg:'llm', nodes:['llm','emb']},
+      {t:'S3 문서 버킷', cfg:'bucket', nodes:['docs']},
+      {t:'OpenSearch Serverless 컬렉션', d:'벡터 검색 유형, 데이터 접근 정책', nodes:['vec']},
+      {t:'Knowledge Base', d:'데이터 원본 = S3, 메타데이터로 권한 필터', nodes:['rag','vec']},
+      {t:'Guardrail', cfg:'llm', nodes:['guard']},
+      {t:'bedrock-runtime 인터페이스 엔드포인트', cfg:'privlink', nodes:['pe']},
+      {t:'질의 Lambda', d:'Retrieve → Converse', cfg:'func', nodes:['app']},
+      {t:'모델 호출 로깅', cfg:'llm', nodes:['logs']}
+    ],
+    gcp: [
+      {t:'Vertex AI API · 서비스 계정', cfg:'llm', nodes:['llm','emb']},
+      {t:'Cloud Storage 문서 버킷', cfg:'bucket', nodes:['docs']},
+      {t:'RAG Engine 말뭉치 + 가져오기', nodes:['rag','vec']},
+      {t:'Model Armor 템플릿', nodes:['guard']},
+      {t:'PSC 엔드포인트 · VPC 서비스 제어', cfg:'privlink', nodes:['pe']},
+      {t:'질의 Cloud Run', cfg:'func', nodes:['app']},
+      {t:'로그 보존', nodes:['logs']}
+    ],
+    azure: [
+      {t:'Azure OpenAI 리소스 + 배포 2개', d:'생성·임베딩, 배포 유형', cfg:'llm', nodes:['llm','emb']},
+      {t:'Blob 문서 컨테이너', cfg:'bucket', nodes:['docs']},
+      {t:'AI Search 서비스 + 인덱서', d:'통합 벡터화, 보안 필터 필드', nodes:['rag','vec']},
+      {t:'Content Safety · Prompt Shields', nodes:['guard']},
+      {t:'Private Endpoint 3개', d:'OpenAI, Search, Storage', cfg:'privlink', nodes:['pe']},
+      {t:'질의 Container Apps', d:'관리 ID', cfg:'func', nodes:['app']},
+      {t:'진단 설정', nodes:['logs']}
+    ]
   },
   map: ['llm-api','embedding','vector-search','managed-rag','ai-guardrail','private-endpoint'],
   decisions: [

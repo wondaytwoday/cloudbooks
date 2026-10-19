@@ -218,7 +218,7 @@
     el.innerHTML = ['aws','gcp','azure'].map(v=>{ const L = S.build[v]||[]; const mk = L.filter(b=>{ const c=st(v,b); return !(b.auto || (c&&c.auto)); }).length;
       return `<div class="bcol v-${v} ${v===vendor?'on':''}"><h3><span class="dot"></span>${NAMES[v]}<small>${L.length}단계 · 직접 만드는 단계 ${mk}</small></h3><ol>${L.map((b,i)=>{ const c=st(v,b); const auto = b.auto || (c&&c.auto);
         const on = !!(sel&&sel.from==='build'&&sel.v===v&&sel.i===i);
-        return `<li class="${auto?'isauto':''} ${on?'cur':''}"><button type="button" class="step" data-v="${v}" data-i="${i}" aria-pressed="${on}"><span class="no">${i+1}</span><span class="bt"><b>${esc(b.t)}</b>${b.d?`<span>${esc(b.d)}</span>`:''}${c?`<em>${esc(b.scope||c.scope)}</em>`:''}</span></button></li>`; }).join('')}</ol></div>`; }).join('');
+        return `<li class="${auto?'isauto':''} ${on?'cur':''}"><button type="button" class="step" data-v="${v}" data-i="${i}" aria-pressed="${on}"><span class="no">${i+1}</span><span class="bt"><b>${esc(b.t)}</b>${b.d?`<span>${esc(b.d)}</span>`:''}${c?`<em>${esc(c.name)} · ${esc(b.scope||c.scope)}</em>`:''}</span></button></li>`; }).join('')}</ol></div>`; }).join('');
     const p = $('bInsp');
     if (sel && sel.from==='build' && CFG[sel.key]){
       const b = sel.i!=null ? (S.build[vendor]||[])[sel.i] : null;

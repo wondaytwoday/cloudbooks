@@ -25,6 +25,7 @@ TEMPLATE = """<!doctype html>
 <script src="../../shared/js/icons.js"></script>
 <div class="bar"><div class="wrap"><span class="vtag">{label}</span><a class="lbl" href="../">{book}</a><a class="lbl" href="../../">CloudBooks</a></div></div>
 <main class="wrap" id="chapter"></main>
+<script src="../../shared/data/configs.js"></script>
 <script src="../data/chapters.js"></script>
 <script src="../../shared/js/vendorbook.js"></script>
 </body>

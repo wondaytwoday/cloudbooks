@@ -16,13 +16,13 @@ window.SCENARIO = {
       {id:'lake', kind:'net', x:436, y:14, w:230, h:300, label:{aws:'레이크 · S3', gcp:'BigQuery + Cloud Storage', azure:'레이크 · ADLS Gen2'}}
     ],
     nodes: [
-      {id:'db', x:24, y:40, w:166, h:48, icon:'db', t:'주문 DB', s:{aws:'Aurora MySQL', gcp:'Cloud SQL', azure:'MySQL Flexible Server'}},
+      {id:'db', cfg:'dbha', x:24, y:40, w:166, h:48, icon:'db', t:'주문 DB', s:{aws:'Aurora MySQL', gcp:'Cloud SQL', azure:'MySQL Flexible Server'}},
       {id:'logs', x:24, y:140, w:166, h:48, icon:'stream', t:'웹 로그·클릭', s:{aws:'Kinesis Data Streams', gcp:'Pub/Sub', azure:'Event Hubs'}},
       {id:'cdc', x:222, y:40, w:190, h:48, icon:'etl', t:'변경 수집 (CDC)', s:{aws:'DMS', gcp:'Datastream', azure:'Data Factory CDC'}},
       {id:'fh', x:222, y:140, w:190, h:48, icon:'stream', t:'스트림 적재', s:{aws:'Data Firehose', gcp:'BigQuery 구독', azure:'Event Hubs Capture'}},
-      {id:'raw', x:448, y:44, w:206, h:48, icon:'obj', t:'원본 영역 (raw)', s:{aws:'S3 · Parquet', gcp:'Cloud Storage · BigQuery 원본 테이블', azure:'ADLS Gen2 · Avro'}},
+      {id:'raw', cfg:'bucket', x:448, y:44, w:206, h:48, icon:'obj', t:'원본 영역 (raw)', s:{aws:'S3 · Parquet', gcp:'Cloud Storage · BigQuery 원본 테이블', azure:'ADLS Gen2 · Avro'}},
       {id:'etl', x:448, y:144, w:206, h:48, icon:'etl', t:'변환', s:{aws:'Glue 잡 (Spark)', gcp:'Dataform · BigQuery SQL', azure:'Data Factory · Spark'}, failS:'스키마 불일치로 실패'},
-      {id:'cur', x:448, y:244, w:206, h:48, icon:{aws:'obj', gcp:'dwh', azure:'obj'}, t:'정제 영역 (curated)', s:{aws:'Iceberg 테이블', gcp:'파티션·클러스터 테이블', azure:'Delta 테이블'}},
+      {id:'cur', cfg:{aws:'bucket', azure:'bucket'}, x:448, y:244, w:206, h:48, icon:{aws:'obj', gcp:'dwh', azure:'obj'}, t:'정제 영역 (curated)', s:{aws:'Iceberg 테이블', gcp:'파티션·클러스터 테이블', azure:'Delta 테이블'}},
       {id:'cat', x:222, y:244, w:190, h:48, icon:'lakegov', t:'카탈로그·열 권한', s:{aws:'Glue 카탈로그 + Lake Formation', gcp:'Dataplex · 정책 태그', azure:'Microsoft Purview'}},
       {id:'q', x:222, y:350, w:190, h:48, icon:'query', t:'분석 SQL', s:{aws:'Athena · Redshift Serverless', gcp:'BigQuery', azure:'Synapse 서버리스 SQL'}},
       {id:'bi', x:448, y:350, w:206, h:48, t:'대시보드', s:{aws:'QuickSight', gcp:'Looker Studio', azure:'Power BI'}, kind:'alt'},
@@ -63,6 +63,37 @@ window.SCENARIO = {
         ['good','Delta 테이블은 스키마 병합 옵션으로 열 추가를 받아들일 수 있습니다.']
       ]
     }
+  },
+  scope: ['bucket','kms','audit'],
+  build: {
+    aws: [
+      {t:'S3 버킷 raw · curated', d:'영역별 접두사, 수명 주기', cfg:'bucket', nodes:['raw','cur']},
+      {t:'Lake Formation 관리자 · 데이터 위치 등록', d:'IAM 권한 대신 LF 권한으로 전환', nodes:['cat']},
+      {t:'Glue 데이터베이스 · 크롤러', nodes:['cat']},
+      {t:'DMS 복제 인스턴스 + 작업', d:'Aurora 바이너리 로그 켜기 필요', nodes:['cdc','db']},
+      {t:'Kinesis Data Streams + Firehose', d:'Parquet 변환, 버퍼링', nodes:['logs','fh']},
+      {t:'Glue 잡 (Iceberg)', d:'raw → curated', nodes:['etl']},
+      {t:'Athena 작업 그룹', d:'결과 버킷, 스캔 한도', nodes:['q']},
+      {t:'MWAA 환경', d:'VPC 서브넷 2개 필요', nodes:['orch']},
+      {t:'LF 태그 · 열 권한', d:'분석가 역할에 부여', nodes:['cat','q']}
+    ],
+    gcp: [
+      {t:'BigQuery 데이터 세트 raw · curated', d:'위치 asia-northeast3', nodes:['raw','cur']},
+      {t:'Datastream 연결 프로필 + 스트림', d:'Cloud SQL 바이너리 로그, 비공개 연결', nodes:['cdc','db']},
+      {t:'Pub/Sub 토픽 + BigQuery 구독', d:'스키마 맞춰 직접 적재', cfg:'queue', nodes:['logs','fh']},
+      {t:'Dataform 저장소', d:'SQL 변환, 증분 테이블', nodes:['etl']},
+      {t:'Dataplex · 정책 태그', d:'열 수준 보안', nodes:['cat']},
+      {t:'Cloud Composer (또는 Dataform 일정)', nodes:['orch']}
+    ],
+    azure: [
+      {t:'ADLS Gen2 스토리지 계정', d:'계층 네임스페이스 켜기 (생성 시)', cfg:'bucket', nodes:['raw','cur']},
+      {t:'Event Hubs 네임스페이스 + Capture', nodes:['logs','fh']},
+      {t:'Data Factory + 관리 ID', d:'관리형 VNet 통합 런타임', nodes:['cdc','etl','orch']},
+      {t:'CDC 리소스', d:'MySQL → ADLS', nodes:['cdc','db']},
+      {t:'Synapse 작업 영역 (서버리스 SQL)', nodes:['q']},
+      {t:'Purview 데이터 원본 등록 · 검색', nodes:['cat']},
+      {t:'ACL · RBAC', d:'Storage Blob Data Reader, 폴더 ACL', cfg:'bucket', nodes:['cat']}
+    ]
   },
   map: ['cdc-replication','stream-ingest','data-lake-storage','etl-transform','data-catalog','sql-analytics','orchestration','bi'],
   decisions: [

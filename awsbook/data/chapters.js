@@ -40,7 +40,7 @@ window.VBOOK = {
      ],
      defaults:['사내망·다른 VPC와 겹치지 않는 넉넉한 CIDR을 VPC IPAM으로 배정합니다.','AZ마다 퍼블릭·앱·DB 서브넷을 같은 모양으로 둡니다.','NAT 게이트웨이를 AZ마다 두거나, 비용이 중요하면 엔드포인트로 NAT 트래픽부터 줄입니다.','보안 그룹은 IP 대역보다 보안 그룹 참조로 씁니다.','VPC 흐름 로그를 켜 두고 보존 기간을 정합니다.'],
      pitfalls:[['NAT 게이트웨이를 하나만 둔다','그 AZ가 멈추면 다른 AZ의 외부 호출까지 끊기고, AZ 간 전송 요금도 붙습니다.'],['기본 VPC를 운영에 쓴다','모든 서브넷이 퍼블릭이고 대역이 계정마다 같아 연결이 어렵습니다.'],['22번 포트를 0.0.0.0/0에 연다','Session Manager로 대체합니다.'],['CIDR이 겹친다','피어링·Transit Gateway·VPN 어느 것도 겹치는 대역은 라우팅하지 못합니다.']],
-     services:['network','subnet','firewall','nat','private-endpoint','network-hub'], scenarios:[1,3,6,9],
+     services:['network','subnet','internet-gateway','route-table','firewall','nat','private-endpoint','network-hub'], scenarios:[1,3,6,9],
      refs:[['Amazon VPC 사용 설명서','https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html'],['AWS Transit Gateway','https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html']]},
 
     {id:'compute', title:'EC2와 오토스케일',

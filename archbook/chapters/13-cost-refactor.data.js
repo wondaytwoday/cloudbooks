@@ -14,15 +14,15 @@ window.SCENARIO = {
     frames: [],
     nodes: [
       {id:'cost', x:230, y:10, w:220, h:50, icon:'cost', t:'비용 가시성', s:{aws:'Cost Explorer · 데이터 내보내기', gcp:'결제 데이터 → BigQuery', azure:'Cost Management 내보내기'}, kind:'reg'},
-      {id:'compute', x:20, y:100, w:200, h:54, icon:'autoscale', t:'앱 서버 40대 · CPU 20%', s:{aws:'m6i.2xlarge 온디맨드', gcp:'n2-standard-8 온디맨드', azure:'D8s v5 종량제'}, failS:'크기 조정 + 약정 할인'},
-      {id:'db', x:240, y:100, w:200, h:54, icon:'db', t:'DB 최대 사양', s:'안 쓰는 읽기 복제본 2개', failS:'복제본 정리 · 사양 한 단계↓'},
-      {id:'nat', x:460, y:100, w:200, h:54, icon:'nat', t:'NAT 처리 요금', s:'스토리지 트래픽이 NAT 경유', failS:'비공개 경로로 우회'},
-      {id:'store', x:20, y:200, w:200, h:54, icon:'obj', t:'오브젝트 300TB', s:'전부 표준 계층', failS:'접근 빈도별 자동 계층'},
+      {id:'compute', cfg:'vmgroup', x:20, y:100, w:200, h:54, icon:'autoscale', t:'앱 서버 40대 · CPU 20%', s:{aws:'m6i.2xlarge 온디맨드', gcp:'n2-standard-8 온디맨드', azure:'D8s v5 종량제'}, failS:'크기 조정 + 약정 할인'},
+      {id:'db', cfg:'dbha', x:240, y:100, w:200, h:54, icon:'db', t:'DB 최대 사양', s:'안 쓰는 읽기 복제본 2개', failS:'복제본 정리 · 사양 한 단계↓'},
+      {id:'nat', cfg:'privlink', x:460, y:100, w:200, h:54, icon:'nat', t:'NAT 처리 요금', s:'스토리지 트래픽이 NAT 경유', failS:'비공개 경로로 우회'},
+      {id:'store', cfg:'bucket', x:20, y:200, w:200, h:54, icon:'obj', t:'오브젝트 300TB', s:'전부 표준 계층', failS:'접근 빈도별 자동 계층'},
       {id:'logs', x:240, y:200, w:200, h:54, icon:'logs', t:'로그 수집 하루 2TB', s:'디버그 로그까지 전부', failS:'수준 필터 · 보관 30일'},
       {id:'xaz', x:460, y:200, w:200, h:54, icon:'net', t:'영역 간 트래픽', s:'앱과 캐시가 다른 영역', failS:'같은 영역 우선 라우팅'},
       {id:'dev', x:20, y:300, w:200, h:54, icon:'account', t:'dev·stg 24시간 가동', s:'업무 시간에만 사용', failS:'야간·주말 자동 종료'},
       {id:'snap', x:240, y:300, w:200, h:54, icon:'backup', t:'오래된 스냅샷·볼륨', s:'주인 없는 리소스', failS:'태그 기준 정리'},
-      {id:'egress', x:460, y:300, w:200, h:54, icon:'cdn', t:'인터넷 송신', s:'이미지를 원본에서 직접', failS:'CDN 캐시 적중률↑'}
+      {id:'egress', cfg:'cdn', x:460, y:300, w:200, h:54, icon:'cdn', t:'인터넷 송신', s:'이미지를 원본에서 직접', failS:'CDN 캐시 적중률↑'}
     ],
     edges: [
       {a:'cost', b:'compute', dash:true}, {a:'cost', b:'db', dash:true}, {a:'cost', b:'nat', dash:true}
@@ -59,6 +59,36 @@ window.SCENARIO = {
         ['good','dev·stg VM에 자동 종료 일정을 걸고, 개발·테스트 구독 가격을 검토합니다.']
       ]
     }
+  },
+  scope: ['privlink','bucket','vmgroup','cdn'],
+  build: {
+    aws: [
+      {t:'비용 데이터 내보내기 · 태그 정리', nodes:['cost']},
+      {t:'S3 게이트웨이 엔드포인트', d:'NAT 처리 요금 제거', cfg:'privlink', nodes:['nat','store']},
+      {t:'S3 Intelligent-Tiering · 수명 주기', cfg:'bucket', nodes:['store']},
+      {t:'인스턴스 크기 조정 → Savings Plans', d:'순서 중요', cfg:'vmgroup', nodes:['compute']},
+      {t:'로그 필터·보존 기간', nodes:['logs']},
+      {t:'CloudFront로 이미지 송신', cfg:'cdn', nodes:['egress']},
+      {t:'dev 일정 정지 · 고아 리소스 정리', nodes:['dev','snap']}
+    ],
+    gcp: [
+      {t:'결제 데이터 → BigQuery', nodes:['cost']},
+      {t:'비공개 Google 액세스', d:'Cloud NAT 처리량 제거', cfg:'privlink', nodes:['nat','store']},
+      {t:'Autoclass · 수명 주기', cfg:'bucket', nodes:['store']},
+      {t:'적정 크기 권장 → 약정 할인', cfg:'vmgroup', nodes:['compute']},
+      {t:'로그 제외 필터', nodes:['logs']},
+      {t:'Cloud CDN', cfg:'cdn', nodes:['egress']},
+      {t:'인스턴스 일정 · 미사용 디스크 정리', nodes:['dev','snap']}
+    ],
+    azure: [
+      {t:'Cost Management 내보내기', nodes:['cost']},
+      {t:'Private Endpoint 또는 서비스 엔드포인트', d:'스토리지 트래픽을 NAT 밖으로', cfg:'privlink', nodes:['nat','store']},
+      {t:'Blob 계층·수명 주기 관리', cfg:'bucket', nodes:['store']},
+      {t:'크기 조정 → 예약·절약 플랜', cfg:'vmgroup', nodes:['compute']},
+      {t:'진단 설정 범주 줄이기', nodes:['logs']},
+      {t:'Front Door 캐시', cfg:'cdn', nodes:['egress']},
+      {t:'자동 종료 · 고아 디스크 정리', nodes:['dev','snap']}
+    ]
   },
   map: ['cost-mgmt','rightsizing','commitment','storage-tiering','spot','vm-schedule'],
   decisions: [

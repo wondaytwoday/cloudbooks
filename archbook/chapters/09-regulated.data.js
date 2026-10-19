@@ -19,17 +19,17 @@ window.SCENARIO = {
       {id:'perim', kind:'group', x:438, y:184, w:226, h:258, label:{aws:'엔드포인트 정책 + 리소스 정책', gcp:'VPC 서비스 제어 경계', azure:'공용 네트워크 접근 차단'}}
     ],
     nodes: [
-      {id:'onprem', x:14, y:30, w:178, h:48, icon:'onprem', t:'영업점·사내망', s:'전용선으로만 접속'},
+      {id:'onprem', cfg:'dedicated', x:14, y:30, w:178, h:48, icon:'onprem', t:'영업점·사내망', s:'전용선으로만 접속'},
       {id:'admin', x:14, y:206, w:178, h:48, icon:'users', t:'운영자', s:'MFA · 작업 승인'},
       {id:'ext', x:14, y:116, w:178, h:48, icon:'obj', t:'외부 저장소', s:'공격자 소유 계정', fail:'show'},
-      {id:'ilb', x:222, y:30, w:200, h:48, icon:'lb', t:'내부 로드밸런서', s:{aws:'내부 ALB', gcp:'내부 Application LB', azure:'내부 Application Gateway'}},
-      {id:'bastion', x:222, y:206, w:200, h:48, icon:'bastion', t:'관리 접속 · 세션 기록', s:{aws:'Systems Manager Session Manager', gcp:'IAP TCP 전달 · OS Login', azure:'Azure Bastion'}},
-      {id:'app', x:222, y:116, w:200, h:48, icon:'vm', t:'업무 앱', s:'비공개 서브넷', failS:'자격 증명 탈취됨'},
-      {id:'egress', x:450, y:116, w:200, h:48, icon:'fw', t:'인터넷 출구 허용 목록', s:{aws:'Network Firewall 도메인 목록', gcp:'Secure Web Proxy · Cloud NGFW', azure:'Azure Firewall 애플리케이션 규칙'}},
-      {id:'audit', x:222, y:300, w:200, h:48, icon:'audit', t:'변경 불가 감사 로그', s:{aws:'CloudTrail → S3 객체 잠금', gcp:'감사 로그 → 잠근 로그 버킷', azure:'활동 로그 → 변경 불가 Blob'}, kind:'alt'},
-      {id:'pe', x:450, y:212, w:204, h:48, icon:'privlink', t:'서비스 비공개 연결', s:{aws:'VPC 엔드포인트', gcp:'Private Service Connect', azure:'Private Endpoint'}},
-      {id:'store', x:450, y:296, w:204, h:48, icon:'obj', t:'업무 데이터', s:{aws:'S3 · SSE-KMS', gcp:'Cloud Storage · CMEK', azure:'Blob · 고객 관리 키'}},
-      {id:'kms', x:450, y:380, w:204, h:48, icon:'kms', t:'고객 관리 키', s:{aws:'KMS · CloudHSM', gcp:'Cloud KMS · Cloud HSM', azure:'Key Vault Managed HSM'}}
+      {id:'ilb', cfg:'lb', x:222, y:30, w:200, h:48, icon:'lb', t:'내부 로드밸런서', s:{aws:'내부 ALB', gcp:'내부 Application LB', azure:'내부 Application Gateway'}},
+      {id:'bastion', cfg:'admin', x:222, y:206, w:200, h:48, icon:'bastion', t:'관리 접속 · 세션 기록', s:{aws:'Systems Manager Session Manager', gcp:'IAP TCP 전달 · OS Login', azure:'Azure Bastion'}},
+      {id:'app', cfg:'vmgroup', x:222, y:116, w:200, h:48, icon:'vm', t:'업무 앱', s:'비공개 서브넷', failS:'자격 증명 탈취됨'},
+      {id:'egress', cfg:'egressfw', x:450, y:116, w:200, h:48, icon:'fw', t:'인터넷 출구 허용 목록', s:{aws:'Network Firewall 도메인 목록', gcp:'Secure Web Proxy · Cloud NGFW', azure:'Azure Firewall 애플리케이션 규칙'}},
+      {id:'audit', cfg:'audit', x:222, y:300, w:200, h:48, icon:'audit', t:'변경 불가 감사 로그', s:{aws:'CloudTrail → S3 객체 잠금', gcp:'감사 로그 → 잠근 로그 버킷', azure:'활동 로그 → 변경 불가 Blob'}, kind:'alt'},
+      {id:'pe', cfg:'privlink', x:450, y:212, w:204, h:48, icon:'privlink', t:'서비스 비공개 연결', s:{aws:'VPC 엔드포인트', gcp:'Private Service Connect', azure:'Private Endpoint'}},
+      {id:'store', cfg:'bucket', x:450, y:296, w:204, h:48, icon:'obj', t:'업무 데이터', s:{aws:'S3 · SSE-KMS', gcp:'Cloud Storage · CMEK', azure:'Blob · 고객 관리 키'}},
+      {id:'kms', cfg:'kms', x:450, y:380, w:204, h:48, icon:'kms', t:'고객 관리 키', s:{aws:'KMS · CloudHSM', gcp:'Cloud KMS · Cloud HSM', azure:'Key Vault Managed HSM'}}
     ],
     edges: [
       {a:'onprem', b:'ilb', label:'전용선'}, {a:'ilb', b:'app'},
@@ -67,6 +67,40 @@ window.SCENARIO = {
         ['good','모든 시도는 방화벽 로그와 스토리지 진단 로그에 남습니다.']
       ]
     }
+  },
+  scope: ['dedicated','privlink','egressfw','kms','admin','audit','guardrail'],
+  build: {
+    aws: [
+      {t:'전용선 + 인터넷 게이트웨이 없는 VPC', d:'IGW를 만들지 않음 = 인바운드 차단', cfg:'dedicated', nodes:['onprem','region']},
+      {t:'KMS 고객 관리 키 (CloudHSM 키 저장소)', cfg:'kms', nodes:['kms']},
+      {t:'VPC 엔드포인트', d:'S3 게이트웨이 + 인터페이스, 엔드포인트 정책', cfg:'privlink', nodes:['pe']},
+      {t:'버킷 정책: aws:SourceVpce 조건', d:'엔드포인트 밖 접근 거부', cfg:'bucket', nodes:['store','perim']},
+      {t:'Network Firewall 출구', d:'도메인 허용 목록, 라우팅 대칭', cfg:'egressfw', nodes:['egress']},
+      {t:'내부 ALB + 앱', cfg:'lb', nodes:['ilb','app']},
+      {t:'Session Manager + 세션 로그', cfg:'admin', nodes:['bastion']},
+      {t:'CloudTrail → 객체 잠금 버킷', d:'규정 준수 모드', cfg:'audit', nodes:['audit']},
+      {t:'SCP', d:'엔드포인트·키 정책 변경 금지', cfg:'guardrail', nodes:['perim']}
+    ],
+    gcp: [
+      {t:'Interconnect + 외부 IP 금지 조직 정책', cfg:'dedicated', nodes:['onprem','region']},
+      {t:'Cloud KMS 키 (HSM)', d:'서비스 에이전트 권한', cfg:'kms', nodes:['kms']},
+      {t:'Private Service Connect 엔드포인트', d:'googleapis 비공개 DNS', cfg:'privlink', nodes:['pe']},
+      {t:'VPC 서비스 제어 경계', d:'프로젝트·API 묶기, 시험 실행 먼저', cfg:'guardrail', nodes:['perim','store','ext']},
+      {t:'Secure Web Proxy', cfg:'egressfw', nodes:['egress']},
+      {t:'내부 Application LB + 앱', d:'프록시 전용 서브넷 필요', cfg:'lb', nodes:['ilb','app']},
+      {t:'IAP + OS Login', cfg:'admin', nodes:['bastion']},
+      {t:'감사 로그 싱크 → 잠근 버킷', d:'데이터 액세스 로그 켜기', cfg:'audit', nodes:['audit']}
+    ],
+    azure: [
+      {t:'ExpressRoute + 공인 IP 금지 정책', cfg:'dedicated', nodes:['onprem','region']},
+      {t:'Managed HSM 키', cfg:'kms', nodes:['kms']},
+      {t:'Private Endpoint + privatelink DNS', d:'대상 리소스 공용 접근 끄기', cfg:'privlink', nodes:['pe','store']},
+      {t:'Azure Firewall + UDR', cfg:'egressfw', nodes:['egress']},
+      {t:'내부 Application Gateway + 앱', d:'사설 프런트엔드 IP만', cfg:'lb', nodes:['ilb','app']},
+      {t:'Azure Bastion (Premium · 세션 녹화)', cfg:'admin', nodes:['bastion']},
+      {t:'활동 로그 → 변경 불가 Blob', d:'시간 기반 보존 정책 잠금', cfg:'audit', nodes:['audit']},
+      {t:'Azure Policy', d:'공용 네트워크 접근 거부 정책', cfg:'guardrail', nodes:['perim']}
+    ]
   },
   map: ['private-endpoint','data-perimeter','egress-filter','kms','admin-access','immutable-log','compliance'],
   decisions: [

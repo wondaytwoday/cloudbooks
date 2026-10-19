@@ -19,14 +19,14 @@ window.SCENARIO = {
     ],
     nodes: [
       {id:'users', x:280, y:8, w:120, h:34, icon:'users', t:'사용자'},
-      {id:'dns', x:50, y:72, w:180, h:44, icon:'dns', t:'DNS', s:{aws:'Route 53', gcp:'Cloud DNS', azure:'Azure DNS'}, kind:'alt'},
-      {id:'edge', x:290, y:72, w:250, h:44, icon:'cdn', t:{aws:'CloudFront + WAF', gcp:'외부 Application LB', azure:'Front Door + WAF'}, s:{aws:'경로별 오리진 라우팅', gcp:'Cloud CDN · Cloud Armor', azure:'경로별 원본 그룹'}, kind:'reg'},
-      {id:'static', x:40, y:178, w:200, h:48, icon:'obj', t:'정적 파일', s:{aws:'S3 · OAC로 비공개', gcp:'Cloud Storage 백엔드 버킷', azure:'Storage 정적 웹사이트'}},
-      {id:'api', x:255, y:178, w:200, h:48, icon:{aws:'apigw', gcp:'lb', azure:'apigw'}, t:{aws:'API Gateway', gcp:'URL 맵 /api/*', azure:'API Management'}, s:{aws:'HTTP API · JWT 검증', gcp:'서버리스 NEG로 전달', azure:'Consumption · JWT 검증'}},
-      {id:'secret', x:470, y:178, w:170, h:48, icon:'secret', t:'시크릿', s:{aws:'Secrets Manager', gcp:'Secret Manager', azure:'Key Vault'}, kind:'alt'},
+      {id:'dns', cfg:'dns', x:50, y:72, w:180, h:44, icon:'dns', t:'DNS', s:{aws:'Route 53', gcp:'Cloud DNS', azure:'Azure DNS'}, kind:'alt'},
+      {id:'edge', cfg:{aws:'cdn', gcp:'lb', azure:'cdn'}, x:290, y:72, w:250, h:44, icon:'cdn', t:{aws:'CloudFront + WAF', gcp:'외부 Application LB', azure:'Front Door + WAF'}, s:{aws:'경로별 오리진 라우팅', gcp:'Cloud CDN · Cloud Armor', azure:'경로별 원본 그룹'}, kind:'reg'},
+      {id:'static', cfg:'bucket', x:40, y:178, w:200, h:48, icon:'obj', t:'정적 파일', s:{aws:'S3 · OAC로 비공개', gcp:'Cloud Storage 백엔드 버킷', azure:'Storage 정적 웹사이트'}},
+      {id:'api', cfg:{aws:'apigw', gcp:'lb', azure:'apigw'}, x:255, y:178, w:200, h:48, icon:{aws:'apigw', gcp:'lb', azure:'apigw'}, t:{aws:'API Gateway', gcp:'URL 맵 /api/*', azure:'API Management'}, s:{aws:'HTTP API · JWT 검증', gcp:'서버리스 NEG로 전달', azure:'Consumption · JWT 검증'}},
+      {id:'secret', cfg:'secret', x:470, y:178, w:170, h:48, icon:'secret', t:'시크릿', s:{aws:'Secrets Manager', gcp:'Secret Manager', azure:'Key Vault'}, kind:'alt'},
       {id:'auth', x:40, y:290, w:200, h:48, icon:'auth', t:'회원 로그인', s:{aws:'Cognito 사용자 풀', gcp:'Identity Platform', azure:'Entra External ID'}},
-      {id:'fn', x:255, y:290, w:200, h:48, icon:{aws:'func', gcp:'run', azure:'func'}, t:{aws:'Lambda', gcp:'Cloud Run', azure:'Functions'}, s:{aws:'요청마다 실행 환경 1개', gcp:'인스턴스당 동시 80', azure:'Flex Consumption'}, failS:'배포 오류로 5xx'},
-      {id:'nosql', x:470, y:290, w:170, h:48, icon:'nosql', t:'주문 데이터', s:{aws:'DynamoDB', gcp:'Firestore', azure:'Cosmos DB'}},
+      {id:'fn', cfg:'func', x:255, y:290, w:200, h:48, icon:{aws:'func', gcp:'run', azure:'func'}, t:{aws:'Lambda', gcp:'Cloud Run', azure:'Functions'}, s:{aws:'요청마다 실행 환경 1개', gcp:'인스턴스당 동시 80', azure:'Flex Consumption'}, failS:'배포 오류로 5xx'},
+      {id:'nosql', cfg:'nosql', x:470, y:290, w:170, h:48, icon:'nosql', t:'주문 데이터', s:{aws:'DynamoDB', gcp:'Firestore', azure:'Cosmos DB'}},
       {id:'mon', x:255, y:392, w:200, h:44, icon:'mon', t:'로그·추적', s:{aws:'CloudWatch + X-Ray', gcp:'Cloud Logging · Trace', azure:'Application Insights'}, kind:'alt'}
     ],
     edges: [
@@ -66,6 +66,46 @@ window.SCENARIO = {
         ['good','/api/* 경로 규칙에 캐시를 켜지 않았다면 오류 응답이 캐시되지 않습니다.']
       ]
     }
+  },
+  scope: ['cdn','bucket','apigw','func','nosql','secret','waf'],
+  build: {
+    aws: [
+      {t:'S3 버킷 (비공개)', d:'퍼블릭 액세스 차단 유지, 빌드 결과 업로드', cfg:'bucket', nodes:['static']},
+      {t:'DynamoDB 테이블', d:'PK·SK 설계, 온디맨드, PITR', cfg:'nosql', nodes:['nosql']},
+      {t:'Secrets Manager 시크릿', d:'외부 API 키', cfg:'secret', nodes:['secret']},
+      {t:'Lambda 함수 + 실행 역할', d:'테이블·시크릿 ARN으로 권한 한정', cfg:'func', nodes:['fn']},
+      {t:'Cognito 사용자 풀', d:'앱 클라이언트, 발급자 URL 확인', nodes:['auth']},
+      {t:'API Gateway HTTP API', d:'JWT 권한 부여자 → Lambda 통합', cfg:'apigw', nodes:['api']},
+      {t:'ACM 인증서 (us-east-1)', d:'CloudFront용은 버지니아 북부에서 발급', cfg:'cdn'},
+      {t:'CloudFront 배포', d:'S3(OAC) 기본 동작 + /api/* → API Gateway, API는 캐시 끔', cfg:'cdn', nodes:['edge']},
+      {t:'WAF 웹 ACL (CLOUDFRONT 범위)', d:'관리형 규칙 + 속도 제한', cfg:'waf', nodes:['edge']},
+      {t:'S3 버킷 정책', d:'이 배포의 OAC만 GetObject 허용', cfg:'bucket', nodes:['static']},
+      {t:'Route 53 별칭 레코드', d:'도메인 → CloudFront', cfg:'dns', nodes:['dns']}
+    ],
+    gcp: [
+      {t:'Cloud Storage 버킷', d:'균일 액세스, 공개 액세스 방지', cfg:'bucket', nodes:['static']},
+      {t:'Firestore 데이터베이스', d:'네이티브 모드, 위치 고정', cfg:'nosql', nodes:['nosql']},
+      {t:'Secret Manager 시크릿', d:'복제 위치 지정', cfg:'secret', nodes:['secret']},
+      {t:'Cloud Run 서비스 + 서비스 계정', d:'인그레스: 내부 + Cloud Load Balancing', cfg:'func', nodes:['fn']},
+      {t:'Identity Platform', d:'로그인 공급자 설정, 토큰은 앱에서 검증', nodes:['auth']},
+      {t:'서버리스 NEG', d:'Cloud Run 서비스를 LB 백엔드로', cfg:'lb', nodes:['api']},
+      {t:'백엔드 버킷 (Cloud CDN 켬) + 백엔드 서비스 (CDN 끔)', d:'정적은 캐시, API는 캐시 없음', cfg:'cdn', nodes:['static','api']},
+      {t:'URL 맵 → 인증서 → 프록시 → 전역 IP → 전달 규칙', d:'/* 버킷, /api/* 서버리스 NEG', cfg:'lb', nodes:['edge','api']},
+      {t:'Cloud Armor 정책', d:'API 백엔드 서비스에 연결', cfg:'waf', nodes:['edge']},
+      {t:'Cloud DNS A 레코드', d:'LB 전역 IP', cfg:'dns', nodes:['dns']}
+    ],
+    azure: [
+      {t:'스토리지 계정 + 정적 웹사이트', d:'$web 컨테이너에 빌드 결과', cfg:'bucket', nodes:['static']},
+      {t:'Cosmos DB 계정 + 컨테이너', d:'파티션 키, 서버리스 또는 자동 크기 조정', cfg:'nosql', nodes:['nosql']},
+      {t:'Key Vault', d:'외부 API 키, RBAC 권한 모델', cfg:'secret', nodes:['secret']},
+      {t:'Function App (Flex Consumption)', d:'관리 ID로 Cosmos DB·Key Vault 접근', cfg:'func', nodes:['fn']},
+      {t:'Entra External ID 테넌트', d:'앱 등록, 발급자 확인', nodes:['auth']},
+      {t:'API Management (Consumption)', d:'validate-jwt 정책, 백엔드 = Function App', cfg:'apigw', nodes:['api']},
+      {t:'Front Door 프로필 + 엔드포인트', d:'원본 그룹 2개: 정적 웹사이트, APIM', cfg:'cdn', nodes:['edge']},
+      {t:'경로 2개', d:'/* 캐시 켬, /api/* 캐시 없음', cfg:'cdn', nodes:['edge','static','api']},
+      {t:'WAF 정책 + 보안 정책', d:'Front Door에 연결', cfg:'waf', nodes:['edge']},
+      {t:'Azure DNS 레코드', d:'사용자 지정 도메인 검증 후 연결', cfg:'dns', nodes:['dns']}
+    ]
   },
   map: ['dns','cdn','waf','object-storage','api-gateway','serverless-compute','nosql','user-auth','secrets','monitoring'],
   decisions: [

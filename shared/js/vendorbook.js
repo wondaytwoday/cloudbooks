@@ -14,6 +14,25 @@
   if (!C){ main.innerHTML = '<p class="load-err">챕터를 찾지 못했습니다.</p>'; return; }
 
   document.title = `${C.title} · ${B.title}`;
+  /* services.json id → shared/data/configs.js 키 */
+  const SVC_CFG = {'network':'vpc','subnet':'subnet','internet-gateway':'igw','route-table':'route','firewall':'firewall','nat':'nat','dns':'dns','cdn':'cdn','waf':'waf',
+    'l7-lb':'lb','vm-autoscale':'vmgroup','mysql-ha':'dbha','cache':'cache','object-storage':'bucket','secrets':'secret','api-gateway':'apigw','serverless-compute':'func',
+    'serverless-container':'func','nosql':'nosql','sso':'sso','guardrail':'guardrail','org-audit':'audit','network-hub':'hubnet','k8s-managed':'k8s','pod-identity':'podid',
+    'event-bus':'eventbus','message-queue':'queue','pubsub-topic':'queue','dedicated-link':'dedicated','site-vpn':'vpn','hybrid-dns':'dnshybrid','global-traffic':'gslb',
+    'cross-region-db':'dbdr','private-endpoint':'privlink','egress-filter':'egressfw','kms':'kms','admin-access':'admin','account-unit':'account','llm-api':'llm'};
+  const CFG = window.CONFIGS || {};
+  const cfgKeys = [...new Set((C.configs || (C.services||[]).map(s=>SVC_CFG[s])).filter(k=>k && CFG[k]))];
+  let sn = 4;
+  function cfgCard(k){
+    const c = CFG[k][v] || {};
+    return `<details class="cfgcard"><summary><b>${esc(c.name)}</b>${c.auto?' <span class="auto">직접 만들지 않음</span>':''}<span class="k">${esc(CFG[k].title)} · 범위: ${esc(c.scope)}</span></summary>
+      <div class="insp"><dl class="where"><div><dt>설정 범위</dt><dd>${esc(c.scope)}</dd></div><div><dt>만드는 위치</dt><dd>${esc(c.where)}</dd></div></dl>
+      <div class="icols"><div><h4>${c.auto?'동작 방식':'만드는 순서'}</h4><ol class="steps">${(c.steps||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div>
+      <div><h4>주요 설정값</h4><div class="tbl in"><table class="cfgt"><thead><tr><th>항목</th><th>예시 값</th><th>설명</th></tr></thead><tbody>${(c.fields||[]).map(f=>`<tr><th scope="row">${esc(f[0])}</th><td class="mono">${esc(f[1])}</td><td>${esc(f[2]||'')}</td></tr>`).join('')}</tbody></table></div>
+      <h4>Terraform 리소스</h4><p class="tf">${(c.tf||[]).map(t=>`<code>${esc(t)}</code>`).join(' ')}</p></div></div>
+      ${c.note?`<p class="inote">${esc(c.note)}</p>`:''}
+      <div class="cmp"><h4>세 클라우드에서는</h4><table><tbody>${['aws','gcp','azure'].map(x=>{ const o=CFG[k][x]||{}; return `<tr class="${x===v?'on':''}"><th scope="row"><span class="vbtn v-${x}" ${x===v?'aria-current="true"':''}>${NAMES[x]}</span></th><td><b>${esc(o.name)}</b>${o.auto?' <span class="auto">자동</span>':''}</td><td>${esc(o.scope)}</td></tr>`; }).join('')}</tbody></table></div></div></details>`;
+  }
   const prev = B.chapters[idx-1], next = B.chapters[idx+1];
   main.innerHTML = `
     <header class="top"><div class="eyebrow">${esc(B.title)} · ${pad(idx+1)}장</div>
@@ -27,7 +46,10 @@
     <section><span class="secno">${idx+1}.4</span><h2>다른 클라우드에서는</h2>
       <p>같은 역할의 서비스를 나란히 놓았습니다. 범위(영역·리전·전역)의 차이가 설계를 바꿉니다.</p>
       <div class="tbl"><table id="mapTable"></table></div></section>
-    ${C.scenarios && C.scenarios.length ? `<section><span class="secno">${idx+1}.5</span><h2>사례집에서 이어 읽기</h2>
+    ${cfgKeys.length ? `<section><span class="secno">${idx+1}.${++sn}</span><h2>실제 설정 화면</h2>
+      <p>이 장 리소스를 ${NAMES[v]}에서 만들 때 설정이 걸리는 범위, 만드는 순서, 주요 값입니다. 항목을 펼치면 다른 두 클라우드의 범위도 함께 보입니다.</p>
+      <div class="cfglist">${cfgKeys.map(cfgCard).join('')}</div></section>` : ''}
+    ${C.scenarios && C.scenarios.length ? `<section><span class="secno">${idx+1}.${++sn}</span><h2>사례집에서 이어 읽기</h2>
       <ul class="xref" id="xref"></ul></section>` : ''}
     <footer><b>공식 문서</b><ul>${(C.refs||[]).map(r=>`<li><a href="${esc(r[1])}" target="_blank" rel="noopener">${esc(r[0])}</a></li>`).join('')}</ul>
       <p>서비스 이름과 동작은 2026년 10월 기준입니다. 한도와 요금은 자주 바뀌므로 공식 문서로 다시 확인하세요.</p>

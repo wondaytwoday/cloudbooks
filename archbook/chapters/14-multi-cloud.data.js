@@ -20,10 +20,10 @@ window.SCENARIO = {
     ],
     nodes: [
       {id:'users', x:280, y:6, w:120, h:34, icon:'users', t:'고객'},
-      {id:'dns', x:220, y:56, w:240, h:48, icon:'dns', t:'DNS · 상태 확인 전환', s:'두 클라우드 밖에 둘지 검토'},
-      {id:'ak', x:35, y:162, w:280, h:48, icon:'k8s', t:'주문 서비스 컨테이너', s:{aws:'EKS', gcp:'GKE', azure:'AKS'}},
+      {id:'dns', cfg:'dns', x:220, y:56, w:240, h:48, icon:'dns', t:'DNS · 상태 확인 전환', s:'두 클라우드 밖에 둘지 검토'},
+      {id:'ak', cfg:'k8s', x:35, y:162, w:280, h:48, icon:'k8s', t:'주문 서비스 컨테이너', s:{aws:'EKS', gcp:'GKE', azure:'AKS'}},
       {id:'adb', x:35, y:250, w:280, h:48, icon:'pg', t:'PostgreSQL', s:{aws:'Aurora PostgreSQL', gcp:'Cloud SQL for PostgreSQL', azure:'Azure Database for PostgreSQL'}},
-      {id:'aobj', x:35, y:336, w:280, h:44, icon:'obj', t:'파일', s:{aws:'S3', gcp:'Cloud Storage', azure:'Blob Storage'}},
+      {id:'aobj', cfg:'bucket', x:35, y:336, w:280, h:44, icon:'obj', t:'파일', s:{aws:'S3', gcp:'Cloud Storage', azure:'Blob Storage'}},
       {id:'bk', x:365, y:162, w:280, h:48, icon:'gk8s', t:'같은 컨테이너 이미지', s:'상대 클라우드의 관리형 쿠버네티스', failS:'트래픽 받는 중'},
       {id:'bdb', x:365, y:250, w:280, h:48, icon:'gdb', t:'PostgreSQL 복제본', s:'논리 복제 · 비동기', failS:'승격 → 쓰기 가능', kind:'alt'},
       {id:'bobj', x:365, y:336, w:280, h:44, icon:'gobj', t:'파일 사본', s:'복제 도구로 주기 복사', kind:'alt'},
@@ -67,6 +67,33 @@ window.SCENARIO = {
         ['good','Azure DNS는 글로벌 서비스라 한 지역 장애에 DNS 응답은 보통 이어집니다.']
       ]
     }
+  },
+  scope: ['k8s','dns','bucket'],
+  build: {
+    aws: [
+      {t:'EKS 클러스터 (주 클라우드)', cfg:'k8s', nodes:['ak']},
+      {t:'Aurora PostgreSQL · 논리 복제 설정', d:'rds.logical_replication = 1', nodes:['adb','bdb']},
+      {t:'클라우드 간 연결', d:'VPN 또는 파트너 상호 연결', cfg:'vpn', nodes:['A','B']},
+      {t:'S3 → 상대 저장소 복제 작업', cfg:'bucket', nodes:['aobj','bobj']},
+      {t:'외부 DNS 상태 확인 전환', cfg:'dns', nodes:['dns']},
+      {t:'Terraform 모듈 · GitOps', nodes:['ci']}
+    ],
+    gcp: [
+      {t:'GKE 클러스터 (주 클라우드)', cfg:'k8s', nodes:['ak']},
+      {t:'Cloud SQL for PostgreSQL · 논리 디코딩', d:'cloudsql.logical_decoding 플래그', nodes:['adb','bdb']},
+      {t:'클라우드 간 연결', d:'HA VPN 또는 Cross-Cloud Interconnect', cfg:'vpn', nodes:['A','B']},
+      {t:'Storage Transfer 작업', cfg:'bucket', nodes:['aobj','bobj']},
+      {t:'외부 DNS 상태 확인 전환', cfg:'dns', nodes:['dns']},
+      {t:'Terraform 모듈 · GitOps', nodes:['ci']}
+    ],
+    azure: [
+      {t:'AKS 클러스터 (주 클라우드)', cfg:'k8s', nodes:['ak']},
+      {t:'PostgreSQL Flexible · 논리 복제', d:'wal_level = logical', nodes:['adb','bdb']},
+      {t:'클라우드 간 연결', d:'VPN Gateway 또는 ExpressRoute 파트너', cfg:'vpn', nodes:['A','B']},
+      {t:'AzCopy·복제 작업', cfg:'bucket', nodes:['aobj','bobj']},
+      {t:'외부 DNS 상태 확인 전환', cfg:'dns', nodes:['dns']},
+      {t:'Terraform 모듈 · GitOps', nodes:['ci']}
+    ]
   },
   map: ['multicloud-mgmt','cross-cloud-link','k8s-managed','iac-native'],
   decisions: [

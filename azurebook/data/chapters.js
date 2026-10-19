@@ -40,7 +40,7 @@ window.VBOOK = {
      ],
      defaults:['허브-스포크로 시작하고 대역을 사내망과 겹치지 않게 계획합니다.','서브넷에는 NSG를, 출구에는 NAT Gateway나 Azure Firewall을 둡니다.','PaaS는 Private Endpoint와 비공개 DNS 영역으로 연결합니다.','VNet 흐름 로그를 켭니다.'],
      pitfalls:[['Private Endpoint의 DNS를 빠뜨린다','사설 IP가 있어도 이름이 공인 IP로 풀려 연결되지 않습니다.'],['피어링이 전이된다고 생각한다','스포크 간 통신에는 허브의 라우팅이 필요합니다.'],['서브넷을 작게 잡는다','Private Endpoint, AKS 노드, 게이트웨이 서브넷이 생각보다 많은 주소를 씁니다.'],['NSG 규칙 우선순위를 섞는다','낮은 숫자가 먼저 적용됩니다. 번호 체계를 정합니다.']],
-     services:['network','subnet','firewall','nat','private-endpoint','network-hub'], scenarios:[1,3,6,9],
+     services:['network','subnet','internet-gateway','route-table','firewall','nat','private-endpoint','network-hub'], scenarios:[1,3,6,9],
      refs:[['Azure Virtual Network 개요','https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview'],['허브-스포크 토폴로지','https://learn.microsoft.com/azure/architecture/networking/architecture/hub-spoke']]},
 
     {id:'compute', title:'VM과 VM Scale Sets',

@@ -16,16 +16,16 @@ window.SCENARIO = {
     ],
     nodes: [
       {id:'users', x:30, y:16, w:110, h:36, icon:'users', t:'고객'},
-      {id:'api', x:180, y:12, w:200, h:46, icon:{aws:'func', gcp:'run', azure:'func'}, t:'주문 접수 API', s:{aws:'Lambda', gcp:'Cloud Run', azure:'Functions'}},
-      {id:'db', x:420, y:12, w:220, h:46, icon:'nosql', t:'주문 저장', s:{aws:'DynamoDB', gcp:'Firestore', azure:'Cosmos DB'}},
-      {id:'bus', x:180, y:104, w:460, h:46, icon:{aws:'eventbus', gcp:'topic', azure:'topic'}, t:'주문 이벤트', s:{aws:'DynamoDB Streams → EventBridge Pipes → 이벤트 버스', gcp:'Firestore 변경 → Eventarc → Pub/Sub 토픽', azure:'Cosmos DB 변경 피드 → Functions → Service Bus 토픽'}, kind:'reg'},
-      {id:'q1', x:40, y:194, w:190, h:44, icon:'queue', t:'재고 큐', s:{aws:'SQS 큐', gcp:'Pub/Sub 구독', azure:'Service Bus 구독'}},
-      {id:'q2', x:245, y:194, w:190, h:44, icon:'queue', t:'결제 큐', s:{aws:'SQS 큐', gcp:'Pub/Sub 구독', azure:'Service Bus 구독'}, failS:'메시지 적체 중'},
-      {id:'q3', x:450, y:194, w:190, h:44, icon:'queue', t:'알림 큐', s:{aws:'SQS 큐', gcp:'Pub/Sub 구독', azure:'Service Bus 구독'}},
-      {id:'c1', x:40, y:282, w:190, h:44, icon:{aws:'func', gcp:'run', azure:'func'}, t:'재고 차감', s:'주문 ID로 멱등 처리'},
+      {id:'api', cfg:'func', x:180, y:12, w:200, h:46, icon:{aws:'func', gcp:'run', azure:'func'}, t:'주문 접수 API', s:{aws:'Lambda', gcp:'Cloud Run', azure:'Functions'}},
+      {id:'db', cfg:'nosql', x:420, y:12, w:220, h:46, icon:'nosql', t:'주문 저장', s:{aws:'DynamoDB', gcp:'Firestore', azure:'Cosmos DB'}},
+      {id:'bus', cfg:'eventbus', x:180, y:104, w:460, h:46, icon:{aws:'eventbus', gcp:'topic', azure:'topic'}, t:'주문 이벤트', s:{aws:'DynamoDB Streams → EventBridge Pipes → 이벤트 버스', gcp:'Firestore 변경 → Eventarc → Pub/Sub 토픽', azure:'Cosmos DB 변경 피드 → Functions → Service Bus 토픽'}, kind:'reg'},
+      {id:'q1', cfg:'queue', x:40, y:194, w:190, h:44, icon:'queue', t:'재고 큐', s:{aws:'SQS 큐', gcp:'Pub/Sub 구독', azure:'Service Bus 구독'}},
+      {id:'q2', cfg:'queue', x:245, y:194, w:190, h:44, icon:'queue', t:'결제 큐', s:{aws:'SQS 큐', gcp:'Pub/Sub 구독', azure:'Service Bus 구독'}, failS:'메시지 적체 중'},
+      {id:'q3', cfg:'queue', x:450, y:194, w:190, h:44, icon:'queue', t:'알림 큐', s:{aws:'SQS 큐', gcp:'Pub/Sub 구독', azure:'Service Bus 구독'}},
+      {id:'c1', cfg:'func', x:40, y:282, w:190, h:44, icon:{aws:'func', gcp:'run', azure:'func'}, t:'재고 차감', s:'주문 ID로 멱등 처리'},
       {id:'c2', x:245, y:282, w:190, h:44, icon:'workflow', t:'결제 사가', s:{aws:'Step Functions', gcp:'Workflows', azure:'Durable Functions'}},
-      {id:'c3', x:450, y:282, w:190, h:44, icon:{aws:'func', gcp:'run', azure:'func'}, t:'알림 발송', s:'외부 메시지 API 호출'},
-      {id:'dlq', x:245, y:376, w:190, h:44, icon:'queue', t:'실패 보관 (DLQ)', s:{aws:'SQS DLQ', gcp:'데드 레터 토픽', azure:'구독별 DLQ (내장)'}, kind:'alt'},
+      {id:'c3', cfg:'func', x:450, y:282, w:190, h:44, icon:{aws:'func', gcp:'run', azure:'func'}, t:'알림 발송', s:'외부 메시지 API 호출'},
+      {id:'dlq', cfg:'queue', x:245, y:376, w:190, h:44, icon:'queue', t:'실패 보관 (DLQ)', s:{aws:'SQS DLQ', gcp:'데드 레터 토픽', azure:'구독별 DLQ (내장)'}, kind:'alt'},
       {id:'mon', x:450, y:376, w:190, h:44, icon:'mon', t:'큐 깊이 경보', s:{aws:'CloudWatch 경보', gcp:'Cloud Monitoring', azure:'Azure Monitor'}, kind:'alt'}
     ],
     edges: [
@@ -65,6 +65,40 @@ window.SCENARIO = {
         ['warn','활성 메시지 수와 데드 레터 메시지 수 지표에 경보를 겁니다.']
       ]
     }
+  },
+  scope: ['nosql','eventbus','queue','func'],
+  build: {
+    aws: [
+      {t:'DynamoDB 테이블 + 스트림', d:'NEW_AND_OLD_IMAGES', cfg:'nosql', nodes:['db']},
+      {t:'주문 접수 Lambda', d:'조건부 쓰기로 중복 방지', cfg:'func', nodes:['api']},
+      {t:'SQS 큐 3개 + DLQ', d:'가시성 제한 시간 > 처리 시간', cfg:'queue', nodes:['q1','q2','q3','dlq']},
+      {t:'EventBridge 버스 + 규칙', d:'OrderPlaced → 큐 3개', cfg:'eventbus', nodes:['bus']},
+      {t:'EventBridge Pipes', d:'DynamoDB Streams → 이벤트 버스', cfg:'eventbus', nodes:['bus','db']},
+      {t:'소비자 Lambda 이벤트 소스 매핑', d:'배치 크기, 부분 배치 응답', cfg:'func', nodes:['c1','c3']},
+      {t:'Step Functions 상태 머신', d:'결제 사가, 보상 단계', nodes:['c2']},
+      {t:'CloudWatch 경보', d:'가장 오래된 메시지 나이, DLQ 깊이', cfg:'queue', nodes:['mon']}
+    ],
+    gcp: [
+      {t:'Firestore 데이터베이스', d:'주문 컬렉션', cfg:'nosql', nodes:['db']},
+      {t:'주문 접수 Cloud Run', d:'트랜잭션으로 중복 방지', cfg:'func', nodes:['api']},
+      {t:'Pub/Sub 토픽 + 데드 레터 토픽', cfg:'eventbus', nodes:['bus','dlq']},
+      {t:'Eventarc 트리거', d:'Firestore 문서 생성 → 게시 서비스', cfg:'eventbus', nodes:['bus']},
+      {t:'구독 3개', d:'확인 기한, 최대 전송 시도, 데드 레터', cfg:'queue', nodes:['q1','q2','q3']},
+      {t:'Pub/Sub 서비스 에이전트 권한', d:'데드 레터 게시·원본 구독 권한', cfg:'queue', nodes:['dlq']},
+      {t:'소비자 Cloud Run (푸시 구독)', d:'OIDC 토큰으로 인증', cfg:'func', nodes:['c1','c3']},
+      {t:'Workflows', d:'결제 사가', nodes:['c2']},
+      {t:'Cloud Monitoring 경보', d:'미확인 메시지 수·가장 오래된 메시지 나이', nodes:['mon']}
+    ],
+    azure: [
+      {t:'Cosmos DB 계정 + 컨테이너', d:'변경 피드는 기본 제공', cfg:'nosql', nodes:['db']},
+      {t:'주문 접수 Functions', cfg:'func', nodes:['api']},
+      {t:'Service Bus 네임스페이스 + 토픽', d:'Standard 이상', cfg:'eventbus', nodes:['bus']},
+      {t:'구독 3개 + 규칙', d:'DLQ는 구독마다 자동', cfg:'queue', nodes:['q1','q2','q3','dlq']},
+      {t:'변경 피드 → 토픽 함수', d:'Cosmos DB 트리거, 임대 컨테이너', cfg:'func', nodes:['bus']},
+      {t:'소비자 Functions', d:'Service Bus 트리거, 관리 ID', cfg:'func', nodes:['c1','c3']},
+      {t:'Durable Functions 오케스트레이터', d:'결제 사가', nodes:['c2']},
+      {t:'Azure Monitor 경보', d:'활성 메시지·데드 레터 메시지 수', nodes:['mon']}
+    ]
   },
   map: ['change-feed','event-bus','pubsub-topic','message-queue','workflow','serverless-compute','nosql','monitoring'],
   decisions: [

@@ -40,7 +40,7 @@ window.VBOOK = {
      ],
      defaults:['커스텀 모드 VPC를 만들고 대역을 직접 계획합니다.','VM에 외부 IP를 주지 않고 Cloud NAT로 나가게 합니다.','방화벽 대상은 네트워크 태그보다 서비스 계정을 씁니다.','서브넷 흐름 로그를 샘플링으로 켭니다.'],
      pitfalls:[['자동 모드 VPC를 운영에 쓴다','모든 리전에 같은 대역이 자동으로 잡혀 다른 네트워크와 연결할 때 겹칩니다.'],['네트워크 태그로만 방화벽을 건다','인스턴스를 수정할 수 있는 사람이 태그를 붙여 규칙을 우회할 수 있습니다.'],['VPC 피어링이 전이된다고 생각한다','A-B, B-C 피어링으로 A-C가 통하지 않습니다.'],['보조 대역을 작게 잡는다','GKE 파드 대역이 모자라 노드를 더 늘리지 못합니다.']],
-     services:['network','subnet','firewall','nat','private-endpoint','network-hub'], scenarios:[1,3,6,9],
+     services:['network','subnet','internet-gateway','route-table','firewall','nat','private-endpoint','network-hub'], scenarios:[1,3,6,9],
      refs:[['VPC 네트워크 개요','https://cloud.google.com/vpc/docs/vpc'],['Cloud NAT 개요','https://cloud.google.com/nat/docs/overview']]},
 
     {id:'compute', title:'Compute Engine과 MIG',

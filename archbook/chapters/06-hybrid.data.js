@@ -19,10 +19,10 @@ window.SCENARIO = {
       {id:'cpe', x:30, y:56, w:180, h:48, icon:'onprem', t:'사내 라우터', s:'BGP · 장비 2대'},
       {id:'dnson', x:30, y:156, w:180, h:48, icon:'dns', t:'사내 DNS · AD', s:'corp.example.local'},
       {id:'erp', x:30, y:256, w:180, h:48, icon:'vm', t:'ERP', s:'사내 API'},
-      {id:'dx', x:245, y:76, w:185, h:56, icon:'dedicated', t:'전용선 (주 경로)', s:{aws:'Direct Connect · 2개 위치', gcp:'Dedicated Interconnect', azure:'ExpressRoute 회선'}, failS:'회선 끊김'},
-      {id:'vpn', x:245, y:200, w:185, h:56, icon:'vpn', t:'VPN (백업 경로)', s:{aws:'Site-to-Site VPN · 터널 2개', gcp:'HA VPN · 터널 2개', azure:'VPN Gateway · 액티브-액티브'}},
-      {id:'gw', x:460, y:56, w:190, h:56, icon:'router', t:'클라우드 게이트웨이', s:{aws:'DX 게이트웨이 + Transit Gateway', gcp:'Cloud Router (BGP)', azure:'허브 VNet의 ER·VPN 게이트웨이'}, kind:'reg'},
-      {id:'resolver', x:460, y:156, w:190, h:48, icon:'dns', t:'DNS 해석', s:{aws:'Route 53 Resolver 엔드포인트', gcp:'Cloud DNS 전달 영역', azure:'DNS Private Resolver'}},
+      {id:'dx', cfg:'dedicated', x:245, y:76, w:185, h:56, icon:'dedicated', t:'전용선 (주 경로)', s:{aws:'Direct Connect · 2개 위치', gcp:'Dedicated Interconnect', azure:'ExpressRoute 회선'}, failS:'회선 끊김'},
+      {id:'vpn', cfg:'vpn', x:245, y:200, w:185, h:56, icon:'vpn', t:'VPN (백업 경로)', s:{aws:'Site-to-Site VPN · 터널 2개', gcp:'HA VPN · 터널 2개', azure:'VPN Gateway · 액티브-액티브'}},
+      {id:'gw', cfg:{aws:'hubnet', gcp:'dedicated', azure:'hubnet'}, x:460, y:56, w:190, h:56, icon:'router', t:'클라우드 게이트웨이', s:{aws:'DX 게이트웨이 + Transit Gateway', gcp:'Cloud Router (BGP)', azure:'허브 VNet의 ER·VPN 게이트웨이'}, kind:'reg'},
+      {id:'resolver', cfg:'dnshybrid', x:460, y:156, w:190, h:48, icon:'dns', t:'DNS 해석', s:{aws:'Route 53 Resolver 엔드포인트', gcp:'Cloud DNS 전달 영역', azure:'DNS Private Resolver'}},
       {id:'app', x:460, y:256, w:190, h:48, icon:'vm', t:'클라우드 앱', s:{aws:'스포크 VPC', gcp:'Shared VPC 서비스 프로젝트', azure:'스포크 VNet'}},
       {id:'mon', x:460, y:348, w:190, h:44, icon:'mon', t:'회선 상태 경보', s:{aws:'CloudWatch · DX 지표', gcp:'Cloud Monitoring', azure:'Azure Monitor · ER 지표'}, kind:'alt'},
       {id:'mig', x:245, y:338, w:185, h:52, icon:'obj', t:'대량 데이터 이전', s:{aws:'DataSync · Snowball', gcp:'Storage Transfer · Appliance', azure:'Storage Mover · Data Box'}, kind:'alt'}
@@ -60,6 +60,39 @@ window.SCENARIO = {
         ['good','ExpressRoute 회선은 하나라도 주·보조 두 연결로 이뤄져 있어, 연결 하나의 장애는 회선 안에서 흡수됩니다. 피어링 위치 자체의 장애는 두 번째 회선으로 대비합니다.']
       ]
     }
+  },
+  scope: ['dedicated','vpn','hubnet','dnshybrid'],
+  build: {
+    aws: [
+      {t:'Direct Connect 연결 주문 (2개 위치)', d:'사업자 개통 대기', cfg:'dedicated', nodes:['dx']},
+      {t:'Transit Gateway', d:'네트워크 계정, RAM 공유', cfg:'hubnet', nodes:['gw']},
+      {t:'DX 게이트웨이 + 전송 VIF', d:'TGW와 연결, 허용 접두사', cfg:'dedicated', nodes:['dx','gw']},
+      {t:'고객 게이트웨이 + Site-to-Site VPN', d:'TGW에 연결, BGP', cfg:'vpn', nodes:['vpn']},
+      {t:'BGP 경로 우선순위', d:'DX 우선, VPN 백업 (AS 경로 등)', cfg:'dedicated', nodes:['cpe','dx','vpn']},
+      {t:'스포크 VPC 연결 + 라우팅', d:'VPC 라우팅 테이블에 사내 대역 → TGW', cfg:'hubnet', nodes:['app']},
+      {t:'Resolver 인바운드·아웃바운드 엔드포인트', d:'corp.example.local 전달 규칙', cfg:'dnshybrid', nodes:['resolver','dnson']},
+      {t:'DX 상태 경보', d:'ConnectionState, BGP 상태', nodes:['mon']}
+    ],
+    gcp: [
+      {t:'Interconnect 연결 주문 (도메인 2개)', cfg:'dedicated', nodes:['dx']},
+      {t:'Cloud Router', d:'ASN, 전역 동적 라우팅 검토', cfg:'dedicated', nodes:['gw']},
+      {t:'VLAN 연결 × 2', d:'Cloud Router에 붙임', cfg:'dedicated', nodes:['dx','gw']},
+      {t:'HA VPN 게이트웨이 + 외부 게이트웨이 + 터널 2개', d:'터널마다 BGP 세션', cfg:'vpn', nodes:['vpn']},
+      {t:'경로 우선순위', d:'BGP MED 조정으로 Interconnect 우선', cfg:'route', nodes:['cpe','dx','vpn']},
+      {t:'사내 쪽 맞춤 경로 광고', d:'Cloud Router 맞춤 광고, 35.199.192.0/19 포함', cfg:'dnshybrid', nodes:['gw']},
+      {t:'Cloud DNS 전달 영역 + 인바운드 정책', cfg:'dnshybrid', nodes:['resolver','dnson']},
+      {t:'서비스 프로젝트 연결', d:'Shared VPC라 라우팅 작업 없음', cfg:'hubnet', nodes:['app']}
+    ],
+    azure: [
+      {t:'허브 VNet + GatewaySubnet', d:'/27 이상', cfg:'subnet', nodes:['gw']},
+      {t:'ExpressRoute 회선', d:'서비스 키 → 사업자', cfg:'dedicated', nodes:['dx']},
+      {t:'프라이빗 피어링 + ER 게이트웨이 + 연결', d:'게이트웨이 배포에 시간이 걸림', cfg:'dedicated', nodes:['dx','gw']},
+      {t:'VPN Gateway (액티브-액티브) + 로컬 게이트웨이', d:'ER과 같은 GatewaySubnet에 공존', cfg:'vpn', nodes:['vpn']},
+      {t:'경로 우선순위', d:'같은 접두사면 ER이 VPN보다 우선', cfg:'route', nodes:['cpe','dx','vpn']},
+      {t:'스포크 피어링', d:'원격 게이트웨이 사용', cfg:'hubnet', nodes:['app']},
+      {t:'DNS Private Resolver', d:'위임 서브넷 2개, 전달 규칙 집합', cfg:'dnshybrid', nodes:['resolver','dnson']},
+      {t:'ER 회선 경보', d:'BGP 가용성, 피어링 상태', nodes:['mon']}
+    ]
   },
   map: ['dedicated-link','site-vpn','network-hub','hybrid-dns','bulk-transfer','monitoring'],
   decisions: [

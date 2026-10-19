@@ -18,18 +18,18 @@ window.SCENARIO = {
     ],
     nodes: [
       {id:'users', x:280, y:8, w:120, h:34, icon:'users', t:'사용자'},
-      {id:'lb', x:230, y:62, w:220, h:46, icon:'lb', t:'L7 진입점', s:{aws:'ALB · Load Balancer Controller', gcp:'GKE Gateway · 외부 LB', azure:'App Gateway for Containers'}, kind:'reg'},
-      {id:'cp', x:30, y:150, w:190, h:48, icon:'k8s', t:'컨트롤 플레인', s:{aws:'EKS 관리형 · 여러 AZ', gcp:'GKE 리전 클러스터', azure:'AKS 관리형'}, kind:'reg'},
+      {id:'lb', cfg:'lb', x:230, y:62, w:220, h:46, icon:'lb', t:'L7 진입점', s:{aws:'ALB · Load Balancer Controller', gcp:'GKE Gateway · 외부 LB', azure:'App Gateway for Containers'}, kind:'reg'},
+      {id:'cp', cfg:'k8s', x:30, y:150, w:190, h:48, icon:'k8s', t:'컨트롤 플레인', s:{aws:'EKS 관리형 · 여러 AZ', gcp:'GKE 리전 클러스터', azure:'AKS 관리형'}, kind:'reg'},
       {id:'reg', x:30, y:212, w:190, h:44, icon:'registry', t:'이미지 저장소', s:{aws:'ECR · 이미지 스캔', gcp:'Artifact Registry', azure:'ACR'}, kind:'alt'},
-      {id:'idn', x:30, y:268, w:190, h:44, icon:'iam', t:'파드 권한', s:{aws:'EKS Pod Identity', gcp:'Workload Identity', azure:'Entra Workload ID'}, kind:'alt'},
-      {id:'sec', x:30, y:324, w:190, h:44, icon:'secret', t:'시크릿', s:{aws:'Secrets Manager + CSI', gcp:'Secret Manager', azure:'Key Vault + CSI'}, kind:'alt'},
-      {id:'n1', x:242, y:240, w:185, h:44, icon:'vm', t:'앱 노드', s:{aws:'Karpenter 노드', gcp:'노드 풀 · 오토스케일', azure:'사용자 노드 풀'}},
+      {id:'idn', cfg:'podid', x:30, y:268, w:190, h:44, icon:'iam', t:'파드 권한', s:{aws:'EKS Pod Identity', gcp:'Workload Identity', azure:'Entra Workload ID'}, kind:'alt'},
+      {id:'sec', cfg:'secret', x:30, y:324, w:190, h:44, icon:'secret', t:'시크릿', s:{aws:'Secrets Manager + CSI', gcp:'Secret Manager', azure:'Key Vault + CSI'}, kind:'alt'},
+      {id:'n1', cfg:'k8s', x:242, y:240, w:185, h:44, icon:'vm', t:'앱 노드', s:{aws:'Karpenter 노드', gcp:'노드 풀 · 오토스케일', azure:'사용자 노드 풀'}},
       {id:'p1', x:242, y:180, w:185, h:44, icon:'k8s', t:'주문·결제 파드', s:'복제본 영역별 분산'},
       {id:'v1', x:242, y:300, w:185, h:44, icon:'files', t:'블록 볼륨', s:{aws:'EBS · AZ에 묶임', gcp:'영역 PD', azure:'Azure Disk LRS'}},
-      {id:'n2', x:457, y:240, w:185, h:44, icon:'vm', t:'앱 노드', s:{aws:'Karpenter 노드', gcp:'노드 풀 · 오토스케일', azure:'사용자 노드 풀'}},
+      {id:'n2', cfg:'k8s', x:457, y:240, w:185, h:44, icon:'vm', t:'앱 노드', s:{aws:'Karpenter 노드', gcp:'노드 풀 · 오토스케일', azure:'사용자 노드 풀'}},
       {id:'p2', x:457, y:180, w:185, h:44, icon:'k8s', t:'주문·결제 파드', s:'복제본 영역별 분산', failS:'파드 추가 생성'},
       {id:'v2', x:457, y:300, w:185, h:44, icon:'files', t:'블록 볼륨', s:{aws:'EBS · AZ에 묶임', gcp:'영역 PD', azure:'Azure Disk LRS'}},
-      {id:'db', x:242, y:410, w:185, h:44, icon:'db', t:'주문 DB', s:{aws:'Aurora MySQL', gcp:'Cloud SQL HA', azure:'MySQL Flexible Server'}},
+      {id:'db', cfg:'dbha', x:242, y:410, w:185, h:44, icon:'db', t:'주문 DB', s:{aws:'Aurora MySQL', gcp:'Cloud SQL HA', azure:'MySQL Flexible Server'}},
       {id:'mon', x:457, y:410, w:185, h:44, icon:'mon', t:'관측', s:{aws:'Container Insights', gcp:'Managed Prometheus', azure:'Managed Prometheus'}, kind:'alt'}
     ],
     edges: [
@@ -67,6 +67,40 @@ window.SCENARIO = {
         ['good','영역에 나눠 둔 복제본이 요청을 받습니다.']
       ]
     }
+  },
+  scope: ['k8s','podid','lb','secret','dbha'],
+  build: {
+    aws: [
+      {t:'VPC · 서브넷 (파드 IP까지 고려)', d:'VPC CNI는 파드에 VPC IP를 씀 → 넉넉한 서브넷', cfg:'subnet'},
+      {t:'클러스터 IAM 역할 + EKS 클러스터', d:'비공개 엔드포인트, 액세스 항목 인증', cfg:'k8s', nodes:['cp']},
+      {t:'애드온', d:'vpc-cni, coredns, kube-proxy, pod-identity-agent, EBS CSI', cfg:'k8s', nodes:['cp','v1','v2']},
+      {t:'Karpenter (또는 관리형 노드 그룹)', d:'NodePool에 AZ·인스턴스 유형 범위', cfg:'k8s', nodes:['n1','n2']},
+      {t:'AWS Load Balancer Controller', d:'Ingress → ALB, 서브넷 태그 필요', cfg:'lb', nodes:['lb']},
+      {t:'ECR 리포지토리', d:'푸시 시 스캔', nodes:['reg']},
+      {t:'Pod Identity 연결', d:'네임스페이스·SA ↔ IAM 역할', cfg:'podid', nodes:['idn']},
+      {t:'Secrets Store CSI + Secrets Manager', d:'파드에 시크릿 마운트', cfg:'secret', nodes:['sec']},
+      {t:'Aurora MySQL', d:'파드 SG(또는 노드 SG)에서 3306 허용', cfg:'dbha', nodes:['db']}
+    ],
+    gcp: [
+      {t:'서브넷 + 보조 대역', d:'pods /14, services /20', cfg:'subnet'},
+      {t:'GKE 리전 클러스터', d:'VPC 네이티브, 비공개 노드, 릴리스 채널', cfg:'k8s', nodes:['cp']},
+      {t:'노드 풀 (Standard) 또는 Autopilot', d:'Autopilot이면 이 단계 없음', cfg:'k8s', nodes:['n1','n2']},
+      {t:'Artifact Registry', d:'리전 저장소', nodes:['reg']},
+      {t:'Workload Identity 권한', d:'KSA 주체에 IAM 역할', cfg:'podid', nodes:['idn']},
+      {t:'Secret Manager', d:'CSI 드라이버 애드온 또는 SDK', cfg:'secret', nodes:['sec']},
+      {t:'Gateway API (gke-l7-global-external-managed)', d:'Gateway·HTTPRoute가 외부 LB를 만듦', cfg:'lb', nodes:['lb']},
+      {t:'Cloud SQL HA + 비공개 서비스 액세스', d:'Cloud SQL Auth Proxy 사이드카', cfg:'dbha', nodes:['db']}
+    ],
+    azure: [
+      {t:'VNet · 노드 서브넷', d:'CNI Overlay면 파드 대역은 VNet 밖', cfg:'subnet'},
+      {t:'AKS 클러스터', d:'Standard 계층, CNI Overlay, 시스템 노드 풀 영역 1·2·3', cfg:'k8s', nodes:['cp']},
+      {t:'사용자 노드 풀', d:'영역 1·2·3, 클러스터 오토스케일러', cfg:'k8s', nodes:['n1','n2']},
+      {t:'ACR + AcrPull 연결', d:'kubelet ID에 권한', nodes:['reg']},
+      {t:'OIDC 발급자 + Workload ID', d:'관리 ID, 페더레이션 자격 증명', cfg:'podid', nodes:['idn']},
+      {t:'Key Vault + CSI 드라이버', d:'애드온 azure-keyvault-secrets-provider', cfg:'secret', nodes:['sec']},
+      {t:'Application Gateway for Containers', d:'ALB 컨트롤러, 위임 서브넷', cfg:'lb', nodes:['lb']},
+      {t:'MySQL Flexible Server', d:'위임 서브넷, 영역 중복 HA', cfg:'dbha', nodes:['db']}
+    ]
   },
   map: ['k8s-managed','node-autoscale','k8s-ingress','container-registry','pod-identity','secrets','mysql-ha','monitoring'],
   decisions: [

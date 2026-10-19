@@ -17,13 +17,13 @@ window.SCENARIO = {
     ],
     nodes: [
       {id:'users', x:30, y:22, w:110, h:36, icon:'users', t:'사용자'},
-      {id:'gslb', x:230, y:16, w:220, h:50, icon:'gslb', t:'전역 트래픽 전환', s:{aws:'Route 53 장애조치 레코드', gcp:'전역 외부 Application LB', azure:'Front Door'}, kind:'reg'},
-      {id:'papp', x:35, y:134, w:280, h:50, icon:'autoscale', t:'앱 · 전체 용량', s:{aws:'EC2 Auto Scaling · 20대', gcp:'관리형 인스턴스 그룹 · 20대', azure:'VM Scale Set · 20대'}},
-      {id:'pdb', x:35, y:234, w:280, h:50, icon:'db', t:'DB Primary', s:{aws:'Aurora Global Database (주)', gcp:'Cloud SQL 주 인스턴스', azure:'Azure SQL 장애 조치 그룹 (주)'}},
-      {id:'pobj', x:35, y:334, w:280, h:50, icon:'obj', t:'파일', s:{aws:'S3 · 교차 리전 복제', gcp:'이중·멀티 리전 버킷', azure:'Blob · GRS'}},
-      {id:'sapp', x:365, y:134, w:280, h:50, icon:'autoscale', t:'앱 · 최소 용량', s:'평시 2대', failS:'전체 용량으로 확장 중'},
-      {id:'sdb', x:365, y:234, w:280, h:50, icon:'db', t:'DB 복제본', s:{aws:'보조 리전 클러스터 (읽기 전용)', gcp:'교차 리전 읽기 복제본', azure:'지역 복제 보조 DB'}, failS:'승격 → Primary', kind:'alt'},
-      {id:'sobj', x:365, y:334, w:280, h:50, icon:'obj', t:'복제된 파일', s:{aws:'S3 대상 버킷', gcp:'같은 버킷 (다른 위치)', azure:'보조 지역 사본'}, kind:'alt'}
+      {id:'gslb', cfg:'gslb', x:230, y:16, w:220, h:50, icon:'gslb', t:'전역 트래픽 전환', s:{aws:'Route 53 장애조치 레코드', gcp:'전역 외부 Application LB', azure:'Front Door'}, kind:'reg'},
+      {id:'papp', cfg:'vmgroup', x:35, y:134, w:280, h:50, icon:'autoscale', t:'앱 · 전체 용량', s:{aws:'EC2 Auto Scaling · 20대', gcp:'관리형 인스턴스 그룹 · 20대', azure:'VM Scale Set · 20대'}},
+      {id:'pdb', cfg:'dbdr', x:35, y:234, w:280, h:50, icon:'db', t:'DB Primary', s:{aws:'Aurora Global Database (주)', gcp:'Cloud SQL 주 인스턴스', azure:'Azure SQL 장애 조치 그룹 (주)'}},
+      {id:'pobj', cfg:'bucket', x:35, y:334, w:280, h:50, icon:'obj', t:'파일', s:{aws:'S3 · 교차 리전 복제', gcp:'이중·멀티 리전 버킷', azure:'Blob · GRS'}},
+      {id:'sapp', cfg:'vmgroup', x:365, y:134, w:280, h:50, icon:'autoscale', t:'앱 · 최소 용량', s:'평시 2대', failS:'전체 용량으로 확장 중'},
+      {id:'sdb', cfg:'dbdr', x:365, y:234, w:280, h:50, icon:'db', t:'DB 복제본', s:{aws:'보조 리전 클러스터 (읽기 전용)', gcp:'교차 리전 읽기 복제본', azure:'지역 복제 보조 DB'}, failS:'승격 → Primary', kind:'alt'},
+      {id:'sobj', cfg:'bucket', x:365, y:334, w:280, h:50, icon:'obj', t:'복제된 파일', s:{aws:'S3 대상 버킷', gcp:'같은 버킷 (다른 위치)', azure:'보조 지역 사본'}, kind:'alt'}
     ],
     edges: [
       {a:'users', b:'gslb'},
@@ -63,6 +63,33 @@ window.SCENARIO = {
         ['warn','Korea South의 VM Scale Set을 전체 용량으로 늘리는 동안 처리량이 모자랍니다.']
       ]
     }
+  },
+  scope: ['gslb','dbdr','bucket','vmgroup'],
+  build: {
+    aws: [
+      {t:'DR 리전 네트워크', d:'CIDR 겹치지 않게, 같은 구조', cfg:'vpc', nodes:['secondary']},
+      {t:'Aurora Global Database', d:'보조 리전 클러스터 추가', cfg:'dbdr', nodes:['pdb','sdb']},
+      {t:'S3 교차 리전 복제', d:'버전 관리 필수, 복제 역할', cfg:'bucket', nodes:['pobj','sobj']},
+      {t:'DR 리전 ASG (최소 2대) + ALB', d:'AMI 복사, 같은 시작 템플릿', cfg:'vmgroup', nodes:['sapp']},
+      {t:'Route 53 상태 확인 + 장애 조치 레코드', cfg:'gslb', nodes:['gslb']},
+      {t:'전환 런북', d:'DB 승격 → 확장 → DNS 전환 순서', cfg:'dbdr', nodes:['pdb','sdb','sapp','gslb']}
+    ],
+    gcp: [
+      {t:'DR 리전 서브넷', d:'같은 VPC에 서브넷만 추가', cfg:'subnet', nodes:['secondary']},
+      {t:'Cloud SQL 교차 리전 복제본', cfg:'dbdr', nodes:['pdb','sdb']},
+      {t:'이중·멀티 리전 버킷', d:'버킷 하나, 복제 설정 없음', cfg:'bucket', nodes:['pobj','sobj']},
+      {t:'DR 리전 MIG (최소 2대)', d:'같은 인스턴스 템플릿', cfg:'vmgroup', nodes:['sapp']},
+      {t:'백엔드 서비스에 백엔드 추가', d:'전역 LB 하나가 두 리전으로', cfg:'gslb', nodes:['gslb']},
+      {t:'전환 런북', d:'복제본 승격 → 앱 연결 대상 변경 → 확장', cfg:'dbdr', nodes:['pdb','sdb','sapp']}
+    ],
+    azure: [
+      {t:'DR 지역 VNet + 피어링', cfg:'vpc', nodes:['secondary']},
+      {t:'보조 논리 서버 + 장애 조치 그룹', d:'수신기 이름으로 접속', cfg:'dbdr', nodes:['pdb','sdb']},
+      {t:'스토리지 GRS (또는 객체 복제)', d:'계정 중복성 설정', cfg:'bucket', nodes:['pobj','sobj']},
+      {t:'DR 지역 VMSS + Application Gateway', cfg:'vmgroup', nodes:['sapp']},
+      {t:'Front Door 원본 그룹 우선순위', cfg:'gslb', nodes:['gslb']},
+      {t:'전환 런북', d:'장애 조치 그룹 전환 → 확장 → 원본 우선순위', cfg:'dbdr', nodes:['pdb','sdb','sapp','gslb']}
+    ]
   },
   map: ['global-traffic','cross-region-db','object-replication','dr-service'],
   decisions: [

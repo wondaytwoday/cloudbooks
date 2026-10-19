@@ -21,18 +21,18 @@ window.SCENARIO = {
       {id:'ou-sbx', kind:'group', x:530, y:92, w:130, h:300, label:{aws:'OU · 샌드박스', gcp:'폴더 · 샌드박스', azure:'관리 그룹 · 샌드박스'}}
     ],
     nodes: [
-      {id:'idp', x:20, y:12, w:190, h:44, icon:'iam', t:'사람 로그인 (SSO)', s:{aws:'IAM Identity Center', gcp:'Cloud Identity · 그룹', azure:'Entra ID'}, kind:'alt'},
+      {id:'idp', cfg:'sso', x:20, y:12, w:190, h:44, icon:'iam', t:'사람 로그인 (SSO)', s:{aws:'IAM Identity Center', gcp:'Cloud Identity · 그룹', azure:'Entra ID'}, kind:'alt'},
       {id:'root', x:240, y:12, w:200, h:44, icon:'org', t:{aws:'조직 루트', gcp:'조직 노드', azure:'루트 관리 그룹'}, s:{aws:'관리 계정은 결제·조직 관리만', gcp:'도메인에 연결된 조직', azure:'테넌트 루트 아래'}, kind:'reg'},
-      {id:'guard', x:470, y:12, w:190, h:44, icon:'guard', t:'가드레일', s:{aws:'SCP · Control Tower', gcp:'조직 정책', azure:'Azure Policy'}, kind:'alt'},
-      {id:'log', x:30, y:124, w:130, h:52, icon:'audit', t:{aws:'로그 보관 계정', gcp:'로그 프로젝트', azure:'로그 구독'}, s:{aws:'조직 CloudTrail', gcp:'집계 싱크', azure:'Log Analytics'}},
+      {id:'guard', cfg:'guardrail', x:470, y:12, w:190, h:44, icon:'guard', t:'가드레일', s:{aws:'SCP · Control Tower', gcp:'조직 정책', azure:'Azure Policy'}, kind:'alt'},
+      {id:'log', cfg:'audit', x:30, y:124, w:130, h:52, icon:'audit', t:{aws:'로그 보관 계정', gcp:'로그 프로젝트', azure:'로그 구독'}, s:{aws:'조직 CloudTrail', gcp:'집계 싱크', azure:'Log Analytics'}},
       {id:'sec', x:30, y:196, w:130, h:52, icon:'sechub', t:'보안 도구', s:{aws:'Security Hub 위임', gcp:'Security Command Center', azure:'Defender for Cloud'}},
-      {id:'hub', x:190, y:124, w:130, h:52, icon:'router', t:'네트워크 허브', s:{aws:'Transit Gateway', gcp:'Shared VPC 호스트', azure:'허브 VNet'}},
-      {id:'egress', x:190, y:196, w:130, h:52, icon:'fw', t:'공용 출구', s:{aws:'Network Firewall', gcp:'Cloud NAT · 방화벽 정책', azure:'Azure Firewall'}},
-      {id:'prod', x:352, y:124, w:156, h:46, icon:'account', t:'커머스 prod', s:{aws:'계정', gcp:'서비스 프로젝트', azure:'구독'}},
-      {id:'stg', x:352, y:184, w:156, h:46, icon:'account', t:'커머스 stg', s:{aws:'계정', gcp:'서비스 프로젝트', azure:'구독'}},
-      {id:'dev', x:352, y:244, w:156, h:46, icon:'account', t:'커머스 dev', s:{aws:'계정', gcp:'서비스 프로젝트', azure:'구독'}, failS:'자격 증명 유출'},
-      {id:'data', x:352, y:316, w:156, h:46, icon:'account', t:'데이터 prod', s:'팀이 다르면 단위도 분리'},
-      {id:'sbx', x:540, y:124, w:110, h:52, icon:'account', t:'개인 실험', s:'예산 상한'},
+      {id:'hub', cfg:'hubnet', x:190, y:124, w:130, h:52, icon:'router', t:'네트워크 허브', s:{aws:'Transit Gateway', gcp:'Shared VPC 호스트', azure:'허브 VNet'}},
+      {id:'egress', cfg:{aws:'egressfw', gcp:'nat', azure:'egressfw'}, x:190, y:196, w:130, h:52, icon:'fw', t:'공용 출구', s:{aws:'Network Firewall', gcp:'Cloud NAT · 방화벽 정책', azure:'Azure Firewall'}},
+      {id:'prod', cfg:'account', x:352, y:124, w:156, h:46, icon:'account', t:'커머스 prod', s:{aws:'계정', gcp:'서비스 프로젝트', azure:'구독'}},
+      {id:'stg', cfg:'account', x:352, y:184, w:156, h:46, icon:'account', t:'커머스 stg', s:{aws:'계정', gcp:'서비스 프로젝트', azure:'구독'}},
+      {id:'dev', cfg:'account', x:352, y:244, w:156, h:46, icon:'account', t:'커머스 dev', s:{aws:'계정', gcp:'서비스 프로젝트', azure:'구독'}, failS:'자격 증명 유출'},
+      {id:'data', cfg:'account', x:352, y:316, w:156, h:46, icon:'account', t:'데이터 prod', s:'팀이 다르면 단위도 분리'},
+      {id:'sbx', cfg:'account', x:540, y:124, w:110, h:52, icon:'account', t:'개인 실험', s:'예산 상한'},
       {id:'cost', x:240, y:440, w:200, h:44, icon:'cost', t:'팀·환경별 비용', s:{aws:'Cost Explorer · 비용 할당 태그', gcp:'결제 내보내기 · 라벨', azure:'Cost Management · 태그'}, kind:'alt'}
     ],
     edges: [
@@ -75,6 +75,44 @@ window.SCENARIO = {
         ['warn','허브의 Azure Firewall 규칙이 스포크 간 통신을 허용하면 dev에서 prod로 갈 수 있습니다.']
       ]
     }
+  },
+  scope: ['sso','guardrail','audit','account','hubnet','egressfw'],
+  build: {
+    aws: [
+      {t:'조직 생성 · 관리 계정', d:'관리 계정은 결제·조직 관리만', nodes:['root']},
+      {t:'Control Tower 랜딩 존', d:'로그 보관·감사 계정 자동 생성, 기본 가드레일', cfg:'guardrail', nodes:['root','log','guard']},
+      {t:'OU 구조', d:'Security · Infrastructure · Workloads · Sandbox', nodes:['ou-sec','ou-infra','ou-wl','ou-sbx']},
+      {t:'IAM Identity Center + 외부 IdP', d:'SCIM 동기화, 권한 세트', cfg:'sso', nodes:['idp']},
+      {t:'SCP 추가', d:'리전 제한, 감사 설정 변경 금지', cfg:'guardrail', nodes:['guard']},
+      {t:'조직 CloudTrail · Config', d:'로그 보관 계정 버킷(객체 잠금)으로', cfg:'audit', nodes:['log']},
+      {t:'Security Hub · GuardDuty 위임 관리자', d:'보안 도구 계정으로 위임', nodes:['sec']},
+      {t:'네트워크 계정: Transit Gateway', d:'RAM으로 공유, 라우팅 테이블 분리', cfg:'hubnet', nodes:['hub']},
+      {t:'공용 출구 VPC: Network Firewall', d:'도메인 허용 목록', cfg:'egressfw', nodes:['egress']},
+      {t:'Account Factory로 워크로드 계정', d:'prod·stg·dev·data, 기본 VPC 삭제', cfg:'account', nodes:['prod','stg','dev','data']},
+      {t:'예산·비용 할당 태그', d:'샌드박스 예산 상한', nodes:['cost','sbx']}
+    ],
+    gcp: [
+      {t:'Cloud Identity · 조직 노드', d:'도메인 확인 후 조직 생성', cfg:'sso', nodes:['root','idp']},
+      {t:'관리 그룹 · 슈퍼 관리자 분리', d:'조직 관리자·결제 관리자 그룹', cfg:'sso', nodes:['idp']},
+      {t:'폴더 구조', d:'common · prod · nonprod · sandbox', nodes:['ou-sec','ou-infra','ou-wl','ou-sbx']},
+      {t:'조직 정책', d:'리소스 위치 제한, 외부 IP 금지, 서비스 계정 키 생성 금지', cfg:'guardrail', nodes:['guard']},
+      {t:'로그 프로젝트 + 조직 집계 싱크', d:'보존 기간 잠금', cfg:'audit', nodes:['log']},
+      {t:'Security Command Center', d:'조직 수준 활성화', nodes:['sec']},
+      {t:'Shared VPC 호스트 프로젝트', d:'서브넷·방화벽 정책·Cloud NAT를 한 곳에서', cfg:'hubnet', nodes:['hub','egress']},
+      {t:'서비스 프로젝트 생성 · 연결', d:'서브넷 단위 networkUser 부여', cfg:'account', nodes:['prod','stg','dev','data']},
+      {t:'결제 내보내기 · 예산', d:'BigQuery로 내보내기, 라벨', nodes:['cost','sbx']}
+    ],
+    azure: [
+      {t:'Entra ID 테넌트 · 관리 그룹 계층', d:'테넌트 루트 아래 플랫폼·랜딩 존·샌드박스', nodes:['root','ou-sec','ou-infra','ou-wl','ou-sbx']},
+      {t:'그룹 · PIM', d:'Owner는 PIM 활성화로만', cfg:'sso', nodes:['idp']},
+      {t:'Azure Policy 이니셔티브 할당', d:'허용 위치, 진단 설정 자동 배포', cfg:'guardrail', nodes:['guard']},
+      {t:'관리 구독: Log Analytics', d:'활동 로그를 모든 구독에서 모음', cfg:'audit', nodes:['log']},
+      {t:'Defender for Cloud', d:'관리 그룹 단위 정책으로 켜기', nodes:['sec']},
+      {t:'연결 구독: 허브 VNet', d:'게이트웨이·방화벽 서브넷', cfg:'hubnet', nodes:['hub']},
+      {t:'Azure Firewall + 방화벽 정책', d:'애플리케이션 규칙으로 도메인 허용', cfg:'egressfw', nodes:['egress']},
+      {t:'워크로드 구독 생성 · 관리 그룹 배치', d:'스포크 VNet 피어링, UDR', cfg:'account', nodes:['prod','stg','dev','data']},
+      {t:'예산 · 태그 정책', d:'샌드박스 예산 경보', nodes:['cost','sbx']}
+    ]
   },
   map: ['org-root','grouping','account-unit','guardrail','sso','org-audit','network-hub','sec-posture','cost-mgmt'],
   decisions: [
