@@ -1,0 +1,24 @@
+name: check
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 0 * * 1"   # 매주 월요일, 오래된 checked 날짜 경고 확인
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 데이터 검사
+        run: python3 tools/check.py
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform 형식 검사
+        # 골격 코드라 validate는 하지 않고 형식만 본다.
+        # 처음에는 경고로 두고, 로컬에서 terraform fmt -recursive iac를 한 번 돌린 뒤 continue-on-error를 지운다.
+        continue-on-error: true
+        run: terraform fmt -check -diff -recursive iac

@@ -1,0 +1,22 @@
+{
+  "note": "세 벤더 책이 같은 목차 뼈대를 쓴다. 사례집에서 '더 읽기' 링크가 같은 id로 세 책에 연결된다.",
+  "common": [
+    { "id": "account",    "title": "계정·조직 구조",  "icon": "pin" },
+    { "id": "iam",        "title": "IAM과 권한",       "icon": "secret" },
+    { "id": "network",    "title": "네트워크",         "icon": "net" },
+    { "id": "compute",    "title": "컴퓨트",           "icon": "vm" },
+    { "id": "storage",    "title": "스토리지",         "icon": "obj" },
+    { "id": "database",   "title": "데이터베이스",     "icon": "db" },
+    { "id": "container",  "title": "컨테이너",         "icon": "sub" },
+    { "id": "serverless", "title": "서버리스",         "icon": "cache" },
+    { "id": "messaging",  "title": "메시징",           "icon": "nat" },
+    { "id": "observe",    "title": "관측성",           "icon": "mon" },
+    { "id": "security",   "title": "보안",             "icon": "edge" },
+    { "id": "cost",       "title": "비용",             "icon": "fw" }
+  ],
+  "unique": {
+    "aws":   { "id": "organizations", "title": "Organizations와 Control Tower", "icon": "pin" },
+    "gcp":   { "id": "bigquery",      "title": "BigQuery와 데이터 분석",       "icon": "db" },
+    "azure": { "id": "entra-hybrid",  "title": "Entra ID와 하이브리드",        "icon": "secret" }
+  }
+}

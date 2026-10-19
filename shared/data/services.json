@@ -1,0 +1,276 @@
+{
+  "checked": "2026-10-19",
+  "note": "서비스 이름과 범위는 checked 날짜 기준. 바꿀 때 checked도 갱신하고 출처를 남긴다.",
+  "services": [
+    {
+      "id": "network",
+      "role": "네트워크 경계",
+      "icon": "net",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "VPC",
+        "scope": "리전"
+      },
+      "gcp": {
+        "name": "VPC",
+        "scope": "글로벌"
+      },
+      "azure": {
+        "name": "VNet",
+        "scope": "리전"
+      }
+    },
+    {
+      "id": "subnet",
+      "role": "서브넷 범위",
+      "icon": "sub",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "서브넷",
+        "scope": "AZ 하나"
+      },
+      "gcp": {
+        "name": "서브넷",
+        "scope": "리전 (모든 영역)"
+      },
+      "azure": {
+        "name": "서브넷",
+        "scope": "VNet 안, 영역 구분 없음"
+      }
+    },
+    {
+      "id": "dns",
+      "role": "DNS",
+      "icon": "dns",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Route 53",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cloud DNS",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure DNS",
+        "scope": ""
+      }
+    },
+    {
+      "id": "cdn",
+      "role": "CDN",
+      "icon": "edge",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "CloudFront",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cloud CDN",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure Front Door",
+        "scope": ""
+      }
+    },
+    {
+      "id": "waf",
+      "role": "WAF",
+      "icon": "edge",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "AWS WAF",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cloud Armor",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure WAF",
+        "scope": ""
+      }
+    },
+    {
+      "id": "l7-lb",
+      "role": "L7 로드밸런서",
+      "icon": "lb",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Application Load Balancer",
+        "scope": "리전"
+      },
+      "gcp": {
+        "name": "외부 Application LB",
+        "scope": "글로벌 (Anycast IP)"
+      },
+      "azure": {
+        "name": "Application Gateway v2",
+        "scope": "리전"
+      }
+    },
+    {
+      "id": "vm-autoscale",
+      "role": "VM 오토스케일",
+      "icon": "vm",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "EC2 Auto Scaling 그룹",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "관리형 인스턴스 그룹",
+        "scope": "리전 MIG로 영역 분산"
+      },
+      "azure": {
+        "name": "VM Scale Sets",
+        "scope": "영역 지정 필요"
+      }
+    },
+    {
+      "id": "firewall",
+      "role": "방화벽",
+      "icon": "fw",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "보안 그룹 + NACL",
+        "scope": "인스턴스·서브넷"
+      },
+      "gcp": {
+        "name": "VPC 방화벽 규칙",
+        "scope": "태그·서비스 계정 대상"
+      },
+      "azure": {
+        "name": "NSG",
+        "scope": "서브넷·NIC"
+      }
+    },
+    {
+      "id": "nat",
+      "role": "아웃바운드 NAT",
+      "icon": "nat",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "NAT Gateway",
+        "scope": "AZ마다 1개"
+      },
+      "gcp": {
+        "name": "Cloud NAT",
+        "scope": "리전 관리형"
+      },
+      "azure": {
+        "name": "NAT Gateway",
+        "scope": "SKU별 영역 동작 확인"
+      }
+    },
+    {
+      "id": "mysql-ha",
+      "role": "관리형 MySQL HA",
+      "icon": "db",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "RDS Multi-AZ",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cloud SQL HA",
+        "scope": "REGIONAL"
+      },
+      "azure": {
+        "name": "Flexible Server",
+        "scope": "ZoneRedundant HA"
+      }
+    },
+    {
+      "id": "cache",
+      "role": "캐시",
+      "icon": "cache",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "ElastiCache",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Memorystore",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure Managed Redis",
+        "scope": ""
+      }
+    },
+    {
+      "id": "object-storage",
+      "role": "오브젝트 스토리지",
+      "icon": "obj",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "S3",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cloud Storage",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Blob Storage",
+        "scope": ""
+      }
+    },
+    {
+      "id": "secrets",
+      "role": "시크릿",
+      "icon": "secret",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Secrets Manager",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Secret Manager",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Key Vault",
+        "scope": ""
+      }
+    },
+    {
+      "id": "monitoring",
+      "role": "모니터링",
+      "icon": "mon",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "CloudWatch",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cloud Monitoring · Logging",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure Monitor",
+        "scope": ""
+      }
+    },
+    {
+      "id": "seoul-region",
+      "role": "서울 리전 코드",
+      "icon": "pin",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "ap-northeast-2",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "asia-northeast3",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Korea Central",
+        "scope": ""
+      }
+    }
+  ]
+}

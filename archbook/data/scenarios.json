@@ -1,0 +1,19 @@
+{
+  "levels": { "basic": "기초", "intermediate": "중급", "advanced": "고급", "synthesis": "종합" },
+  "scenarios": [
+    { "no": 1,  "id": "three-tier",       "level": "basic",        "status": "writing", "file": "chapters/01-three-tier.html", "title": "3티어 웹서비스", "question": "웹·앱·DB를 영역 장애에 견디게 세우려면?" },
+    { "no": 2,  "id": "static-serverless","level": "basic",        "status": "planned", "title": "정적 사이트와 서버리스 API", "question": "서버 없이 프런트와 API를 운영하려면?" },
+    { "no": 3,  "id": "landing-zone",     "level": "basic",        "status": "planned", "title": "dev·stg·prod 계정 구조", "question": "환경과 팀을 계정·프로젝트·구독으로 어떻게 나눌까?" },
+    { "no": 4,  "id": "k8s-platform",     "level": "intermediate", "status": "planned", "title": "쿠버네티스 마이크로서비스", "question": "EKS·GKE·AKS 위에 서비스 여러 개를 올리려면?" },
+    { "no": 5,  "id": "event-driven",     "level": "intermediate", "status": "planned", "title": "이벤트 기반 주문 처리", "question": "큐와 이벤트로 주문 흐름을 느슨하게 묶으려면?" },
+    { "no": 6,  "id": "hybrid",           "level": "intermediate", "status": "planned", "title": "온프레미스 하이브리드 연결", "question": "사내 데이터센터와 VPN·전용선으로 이으려면?" },
+    { "no": 7,  "id": "data-lake",        "level": "intermediate", "status": "planned", "title": "데이터 레이크와 분석 파이프라인", "question": "로그와 주문 데이터를 모아 분석하려면?" },
+    { "no": 8,  "id": "multi-region-dr",  "level": "advanced",     "status": "planned", "title": "멀티 리전 재해 복구", "question": "RPO·RTO 목표에 맞춰 리전 장애를 대비하려면?" },
+    { "no": 9,  "id": "regulated",        "level": "advanced",     "status": "planned", "title": "금융·공공 규제 환경", "question": "망분리, 감사 로그, 키 관리를 요구받으면?" },
+    { "no": 10, "id": "traffic-spike",    "level": "advanced",     "status": "planned", "title": "트래픽 급증 대응", "question": "티켓 오픈처럼 순간 수십 배 몰리는 요청을 받으려면?" },
+    { "no": 11, "id": "ml-serving",       "level": "advanced",     "status": "planned", "title": "ML 학습과 추론 서빙", "question": "GPU 학습과 저지연 추론을 함께 운영하려면?" },
+    { "no": 12, "id": "llm-rag",          "level": "advanced",     "status": "planned", "title": "LLM·RAG 애플리케이션", "question": "벡터 검색과 모델 API를 안전하게 붙이려면?" },
+    { "no": 13, "id": "cost-refactor",    "level": "synthesis",    "status": "planned", "title": "비용 최적화 리팩터링", "question": "이미 돌고 있는 시스템의 청구서를 줄이려면?" },
+    { "no": 14, "id": "multi-cloud",      "level": "synthesis",    "status": "planned", "title": "멀티클라우드는 언제 의미가 있나", "question": "두 클라우드를 함께 쓸 이유와 비용은?" }
+  ]
+}

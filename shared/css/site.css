@@ -1,0 +1,40 @@
+/* 포털·목차 페이지 전용. book.css 위에 얹어 쓴다. */
+.site-head{padding-block:48px 28px}
+.site-head h1{font-size:clamp(30px,7vw,46px)}
+.crumb{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;color:var(--muted)}
+.crumb a{color:var(--muted)}
+
+.shelf{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:8px}
+.book{display:grid;grid-template-rows:auto 1fr auto;gap:10px;background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:18px;color:var(--ink);text-decoration:none;min-width:0;position:relative;overflow:hidden}
+.book::before{content:"";position:absolute;inset:0 0 auto;height:5px;background:var(--vc,var(--ink))}
+.book:hover{border-color:var(--vci,var(--ink))}
+.book:focus-visible{outline:2px solid var(--vci,var(--ink));outline-offset:2px}
+.book .bt{display:flex;align-items:center;gap:10px;margin-top:4px}
+.book .bt .tile{width:30px;height:30px;margin:0}
+.book .bt .tile rect{fill:var(--vc,var(--ink))}
+.book .bt .tile .gl{stroke:var(--vco,var(--sheet))}
+.book h2{font-size:22px;margin:0}
+.book .sub{font-size:13px;color:var(--vci,var(--muted));font-weight:600}
+.book p{font-size:14.5px;color:var(--muted);margin:0}
+.book.featured{grid-column:1/-1}
+.badge{justify-self:start;font:600 12px var(--f-mono);padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.badge.writing{border-color:var(--ok);color:var(--ok)}
+.badge.published{background:var(--ok);border-color:var(--ok);color:var(--sheet)}
+
+.levels{display:grid;gap:22px;margin-top:6px}
+.levels h3{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:0 0 8px}
+.toc{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.toc li a,.toc li > div{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--ink);text-decoration:none}
+.toc li a:hover{border-color:var(--accent-ink)}
+.toc li > div{opacity:.72}
+.toc .no{font-family:var(--f-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.toc .tt{min-width:0}
+.toc .tt b{display:block}
+.toc .tt span{font-size:14px;color:var(--muted)}
+.toc .tile{margin:0}
+.vchips{display:flex;gap:6px}
+.vchip{width:10px;height:10px;border-radius:50%;background:var(--vc)}
+.empty{color:var(--muted);font-size:14px}
+
+/* 책장·사례집 목차는 특정 클라우드 색 없이 먹색으로 */
+body[data-page="portal"],body[data-page="archbook"]{--accent:var(--ink);--accent-ink:var(--ink);--accent-soft:var(--grid);--on-accent:var(--sheet)}

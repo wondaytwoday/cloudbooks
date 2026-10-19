@@ -1,0 +1,47 @@
+{
+  "series": "CloudBooks",
+  "tagline": "같은 시스템을 AWS, GCP, Azure에 각각 세워 보며 배우는 클라우드 설계 교과서",
+  "books": [
+    {
+      "id": "archbook",
+      "title": "ArchBook",
+      "subtitle": "설계 사례집",
+      "vendor": null,
+      "status": "writing",
+      "path": "archbook/",
+      "icon": "net",
+      "description": "실제 구축 시나리오 하나를 세 클라우드에 나란히 설계합니다. 도면, 장애 시뮬레이션, 리소스 매핑, Terraform까지."
+    },
+    {
+      "id": "awsbook",
+      "title": "AWSBook",
+      "subtitle": "AWS 레퍼런스",
+      "vendor": "aws",
+      "status": "planned",
+      "path": "awsbook/",
+      "icon": "vm",
+      "description": "계정 구조부터 비용까지, 사례집에서 넘어와 깊이 읽는 AWS 설명서."
+    },
+    {
+      "id": "gcpbook",
+      "title": "GCPBook",
+      "subtitle": "Google Cloud 레퍼런스",
+      "vendor": "gcp",
+      "status": "planned",
+      "path": "gcpbook/",
+      "icon": "vm",
+      "description": "프로젝트 구조, 글로벌 VPC, BigQuery까지 Google Cloud의 설계 방식을 다룹니다."
+    },
+    {
+      "id": "azurebook",
+      "title": "AzureBook",
+      "subtitle": "Azure 레퍼런스",
+      "vendor": "azure",
+      "status": "planned",
+      "path": "azurebook/",
+      "icon": "vm",
+      "description": "구독과 리소스 그룹, Entra ID, 하이브리드까지 Azure의 설계 방식을 다룹니다."
+    }
+  ],
+  "statusLabels": { "published": "출간", "writing": "집필 중", "planned": "집필 예정" }
+}
