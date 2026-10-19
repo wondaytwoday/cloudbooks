@@ -521,5 +521,18 @@ window.CONFIGS = {
     azure: { name:'Azure OpenAI 리소스 + 배포', scope:'지역 (배포 유형에 따라 처리 위치)', where:'리소스 그룹',
       steps:['Azure OpenAI(또는 AI Foundry) 리소스를 만듭니다.','모델 배포를 만들고 배포 유형(Standard·Data Zone·Global·프로비저닝)과 할당량을 정합니다.','앱 관리 ID에 Cognitive Services OpenAI User 역할을 주고 키 인증을 끕니다.','공용 접근을 끄고 Private Endpoint를 둡니다. 콘텐츠 필터 정책을 확인합니다.'],
       fields:[['배포 유형','Standard (지역 처리)',''],['인증','Entra ID',''],['네트워크','Private Endpoint',''],['콘텐츠 필터','기본 + 사용자 지정','']],
-      tf:['azurerm_cognitive_account','azurerm_cognitive_deployment','azurerm_role_assignment'], note:'Global 배포 유형은 처리 지역이 바뀔 수 있으므로 데이터 위치 요구와 함께 정합니다.' } }
+      tf:['azurerm_cognitive_account','azurerm_cognitive_deployment','azurerm_role_assignment'], note:'Global 배포 유형은 처리 지역이 바뀔 수 있으므로 데이터 위치 요구와 함께 정합니다.' } },
+  peering: { title: '네트워크 피어링',
+    aws: { name:'VPC 피어링', scope:'VPC 두 개 (1:1)', where:'요청 VPC → 수락 VPC',
+      steps:['한쪽 VPC에서 피어링을 요청하고 상대 계정·VPC가 수락합니다.','양쪽 라우팅 테이블에 상대 CIDR → pcx 경로를 직접 넣습니다.','보안 그룹에서 상대 CIDR(같은 리전이면 상대 보안 그룹 참조)을 허용합니다.','전이 라우팅이 안 되므로 VPC가 많아지면 Transit Gateway로 바꿉니다.'],
+      fields:[['요청자','vpc-dev',''],['수락자','vpc-shared',''],['경로','10.0.0.0/16 → pcx-xxxx','양쪽 모두'],['DNS 해석','상대 사설 DNS 허용','']],
+      tf:['aws_vpc_peering_connection','aws_vpc_peering_connection_accepter','aws_route'], note:'CIDR이 겹치면 피어링을 만들 수 없습니다.' },
+    gcp: { name:'VPC 네트워크 피어링', scope:'VPC 네트워크 두 개', where:'양쪽 네트워크에 각각',
+      steps:['양쪽 네트워크에서 서로를 가리키는 피어링을 각각 만들어야 활성화됩니다.','서브넷 경로는 자동으로 교환됩니다. 커스텀 경로(정적·동적)는 가져오기·내보내기 옵션을 켜야 넘어갑니다.','상대 대역을 받는 쪽 VPC 방화벽에서 허용 규칙을 만듭니다.','피어링은 전이되지 않습니다. A-B, B-C가 있어도 A와 C는 통신하지 못합니다.'],
+      fields:[['피어링','vpc-dev ↔ vpc-shared',''],['서브넷 경로 교환','자동',''],['커스텀 경로','내보내기·가져오기 선택','하이브리드 경로 공유 시'],['방화벽','상대 대역 허용 필요','']],
+      tf:['google_compute_network_peering'], note:'경로 테이블 작업은 없지만 방화벽은 따로 열어야 합니다.' },
+    azure: { name:'VNet 피어링', scope:'VNet 두 개 (양방향 연결 두 개)', where:'양쪽 VNet',
+      steps:['양쪽 VNet에서 피어링 연결을 만듭니다(포털은 한 번에 둘 다 생성).','가상 네트워크 접근 허용, 전달된 트래픽 허용, 게이트웨이 전송 옵션을 정합니다.','상대 주소 공간이 시스템 경로로 자동 추가됩니다.','피어링은 전이되지 않으므로 스포크끼리는 허브 방화벽으로 UDR을 걸어 통신시킵니다.'],
+      fields:[['허브 → 스포크','게이트웨이 전송 허용',''],['스포크 → 허브','원격 게이트웨이 사용',''],['전달된 트래픽','허용','방화벽 경유 시'],['경로','상대 주소 공간 (자동)','']],
+      tf:['azurerm_virtual_network_peering'], note:'피어링 시스템 경로는 UDR의 더 넓은 대역(예: 10.0.0.0/8)보다 구체적이라 방화벽을 우회할 수 있습니다.' } }
 };
