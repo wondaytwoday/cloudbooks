@@ -6,7 +6,9 @@
      no, title, level, lede,
      req: [{k, v, s}],                                  요구사항 칸
      intro: { arch, map, dec, sim, iac, chk }            각 절 머리 문단 (선택)
-     diagram: { w, h, aria,
+     diagram: { w, h, aria,                              diagram 전체를 {aws:{..}, gcp:{..}, azure:{..}}로 써도 된다
+       노드·프레임에 cfg:'igw'를 주면 누를 수 있고, shared/data/configs.js의 설정 화면이 열린다.
+       노드 kind: ghost(직접 만들지 않는 자동 리소스) | chip(방화벽·라우팅처럼 붙는 설정, 작은 꼬리표)
        frames: [{id, x,y,w,h, kind, label, only}],       kind: region | net | zone | band | group | onprem | plain
        nodes:  [{id, x,y,w,h, icon, t, s, kind, only, failS}],
        edges:  [{a, b, label, dash, only, fail}],         fail: 'hide' | 'show'
@@ -15,6 +17,8 @@
      map: [serviceId],                                   shared/data/services.json의 id
      decisions: [{t, p, aws, gcp, azure, so}],
      sims: [{type, ...}],                                shared/js/sims.js
+     scope: [configKey],                                 설정 범위 비교표 행
+     build: {aws:[{t, d, cfg, nodes:[id]}], gcp:[..], azure:[..]},   구축 순서
      iac: 'iac/scenario-NN',                             {aws,gcp,azure}/main.tf
      checklist: [[제목, 설명]],
      refs: [[제목, url]],
@@ -44,6 +48,10 @@
 
   /* ---------- 지면 뼈대 ---------- */
   const I = S.intro || {};
+  const CFG = window.CONFIGS || {};
+  const DIAGS = isPV(S.diagram) ? Object.values(S.diagram) : [S.diagram];
+  const HAS_CFG = DIAGS.some(d => d.nodes.some(o=>o.cfg) || d.frames.some(f=>f.cfg));
+  let sel = null, hl = new Set();   // sel: {id?, key}
   const pad = n => String(n).padStart(2,'0');
   const sec = (n, id, title, intro, inner) => `<section id="${id}"><span class="secno">${S.no}.${n}</span><h2>${esc(title)}</h2>${intro?`<p>${intro}</p>`:''}${inner}</section>`;
   let n = 0;
@@ -52,9 +60,13 @@
     `<dl class="req">${S.req.map(r=>`<div><dt>${esc(r.k)}</dt><dd>${esc(r.v)}<small>${esc(r.s||'')}</small></dd></div>`).join('')}</dl>`));
   parts.push(sec(++n,'arch','아키텍처 도면', I.arch || '',
     `<div class="figure"><div class="fig-tools"><span class="t" id="figTitle"></span>${S.fail?`<button type="button" class="btn" id="failBtn" aria-pressed="false"></button>`:''}</div>
-     <div class="scroll"><svg id="diagram" viewBox="0 0 ${S.diagram.w} ${S.diagram.h}" style="min-width:${Math.min(S.diagram.w,680)}px" role="img" aria-label="${esc(S.diagram.aria||S.title+' 아키텍처 도면')}"></svg></div>
+     <div class="scroll"><svg id="diagram" viewBox="0 0 ${DIAGS[0].w} ${DIAGS[0].h}" role="img" aria-label="${esc(S.diagram.aria||S.title+' 아키텍처 도면')}"></svg></div>
+     ${HAS_CFG?`<p class="howto">상자를 누르면 그 리소스의 실제 설정이 열립니다. <span class="k-ghost">점선 상자</span>는 클라우드가 알아서 만들어 직접 만들 필요가 없는 것, <span class="k-chip">작은 꼬리표</span>는 방화벽·라우팅 같은 설정이 붙는 위치입니다.</p>`:''}
+     <div class="insp" id="insp" aria-live="polite" hidden></div>
      <div class="legend" id="legend" aria-label="아이콘 범례"></div><div class="effects" id="effects"></div></div>`));
   if (S.map) parts.push(sec(++n,'map','리소스 매핑표', I.map || '같은 역할을 하는 리소스를 한 줄에 놓았습니다. 이름이 비슷해도 <b>범위</b>가 다르면 설계가 달라집니다.', `<div class="tbl"><table id="mapTable"></table></div>`));
+  if (S.build) parts.push(sec(++n,'build','설정 범위와 구축 순서', I.build || '도면은 비슷해도 직접 만드는 리소스, 설정이 걸리는 단위, 만드는 순서는 클라우드마다 다릅니다. 표의 칸이나 단계를 누르면 실제 설정 항목이 열립니다.',
+    `${S.scope?`<div class="tbl"><table id="scopeTable" class="scope"></table></div>`:''}<div class="build" id="buildCols"></div><div class="insp bpanel" id="bInsp" aria-live="polite" hidden></div>`));
   if (S.decisions) parts.push(sec(++n,'dec','세 클라우드가 갈리는 설계 결정', I.dec || '서비스 이름만 바꿔 끼우면 놓치는 지점들입니다.', `<div class="decisions" id="decisions"></div>`));
   if (S.sims && S.sims.length) parts.push(sec(++n,'sim','설계 시뮬레이터', I.sim || '결과를 먼저 예측해 본 뒤 값을 움직여 확인하세요.', S.sims.map((_,i)=>`<div class="sim" id="sim${i}"></div>`).join('')));
   if (S.iac) parts.push(sec(++n,'iac','IaC 골격 (Terraform)', I.iac || '클라우드마다 달라지는 핵심 설정만 추린 골격입니다. 필수 인자 일부를 생략했으므로 그대로 적용되지는 않습니다.',
@@ -79,20 +91,34 @@
     if (u) return `<image href="${u}" x="${x}" y="${y}" width="${t}" height="${t}"/>`;
     return box(x,y,t,t,'ic-bg',5) + `<use href="#g-${CloudIcons.glyph(ic)}" class="gl" x="${x+t*.14}" y="${y+t*.14}" width="${t*.72}" height="${t*.72}"/>`;
   }
+  const tw = (t, k) => [...String(t)].reduce((a,c)=>a+(c.charCodeAt(0)>0x1100?k*1.02:k*.58),0);
+  function wrapHit(o, inner, extra){
+    const key = pv(o.cfg);
+    const cls = [extra||'', hl.has(o.id)?'hl':'', sel&&sel.id===o.id?'sel':''].join(' ');
+    if (!key || !CFG[key]) return `<g class="${cls}">${inner}</g>`;
+    const nm = (CFG[key][vendor]||{}).name || CFG[key].title;
+    return `<g class="hit ${cls}" data-id="${esc(o.id)}" data-cfg="${esc(key)}" tabindex="0" role="button" aria-label="${esc(pv(o.t)||pv(o.label)||nm)} 설정 보기">${inner}</g>`;
+  }
+  function chip(o){
+    const t = pv(o.t), w = o.w || Math.round(tw(t,10.5)+16), h = 18;
+    return wrapHit(o, box(o.x,o.y,w,h,'chip',9) + txt(o.x+w/2, o.y+12.5, t, 'lab-chip', 'middle'), 'chipg');
+  }
   function node(o, down, promo){
+    if (o.kind==='chip') return chip(o);
     const h = o.h || 44, w = o.w || 170;
     const cls = ['n', o.kind||'', promo?'promo':''].join(' ');
     let s = box(o.x,o.y,w,h,cls,5);
+    if (o.kind==='ghost') s += box(o.x+w-34, o.y-7, 30, 14, 'ghost-tag', 7) + txt(o.x+w-19, o.y+3.5, '자동', 'lab-ghost', 'middle');
     let tx = o.x + w/2, an = 'middle';
     const ic = pv(o.icon);
     if (ic){ const t = Math.min(26, h-10); s += icon(ic, o.x+6, o.y+(h-t)/2, t); tx = o.x + t + 13; an = 'start'; }
     const t1 = pv(o.t), t2 = (failed && o.failS) ? pv(o.failS) : pv(o.s);
     if (t2){ s += txt(tx, o.y+h/2-2, t1, 'lab-n', an) + txt(tx, o.y+h/2+12, t2, 'lab-sub', an); }
     else s += txt(tx, o.y+h/2+4, t1, 'lab-n', an);
-    return `<g class="${down?'is-down':''}">${s}</g>`;
+    return wrapHit(o, s, down?'is-down':'');
   }
   function anchor(o, tx, ty){
-    const w = o.w||170, h = o.h||44, cx = o.x+w/2, cy = o.y+h/2;
+    const w = o.w||170, h = o.kind==='chip' ? 18 : (o.h||44), cx = o.x+w/2, cy = o.y+h/2;
     const dx = tx-cx, dy = ty-cy;
     if (!dx && !dy) return [cx,cy];
     const sx = dx ? (w/2)/Math.abs(dx) : Infinity, sy = dy ? (h/2)/Math.abs(dy) : Infinity;
@@ -100,7 +126,9 @@
     return [cx+dx*k, cy+dy*k];
   }
   function render(){
-    const D = S.diagram, F = S.fail || {};
+    const D = pv(S.diagram), F = S.fail || {};
+    const svg = $('diagram');
+    svg.setAttribute('viewBox', `0 0 ${D.w} ${D.h}`); svg.style.minWidth = Math.min(D.w,680)+'px';
     const nodes = D.nodes.filter(o => shown(o) && (o.fail!=='show' || failed)), byId = {};
     nodes.forEach(o => byId[o.id] = o);
     const downSet = new Set(failed ? (F.down||[]) : []);
@@ -108,12 +136,20 @@
     let s = `<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="arrow"/></marker></defs>`;
     const FK = {region:'f-region', net:'f-net', zone:'f-zone', band:'f-band', group:'grp', onprem:'f-onprem', plain:'f-sub'};
     D.frames.filter(shown).forEach(f => {
-      s += box(f.x,f.y,f.w,f.h,FK[f.kind]||'f-sub', f.kind==='band'?6:8);
+      const fc = (FK[f.kind]||'f-sub') + (hl.has(f.id)?' hl':'') + (sel&&sel.id===f.id?' sel':'');
+      s += box(f.x,f.y,f.w,f.h,fc, f.kind==='band'?6:8);
       const lab = pv(f.label);
       if (lab){
-        const cls = f.kind==='net'||f.kind==='group' ? 'lab-acc' : (f.kind==='zone' ? 'lab-z' : 'lab-s');
-        if (f.kind==='zone' || f.kind==='band' || f.labelRight) s += txt(f.x+f.w-8, f.y+14, lab, cls, 'end');
-        else s += txt(f.x+10, f.y+16, lab, cls);
+        const key = pv(f.cfg);
+        const cls = (f.kind==='net'||f.kind==='group' ? 'lab-acc' : (f.kind==='zone' ? 'lab-z' : 'lab-s')) + (key&&CFG[key]?' lab-cfg':'');
+        const right = f.kind==='zone' || f.kind==='band' || f.labelRight;
+        const lx = right ? f.x+f.w-8 : f.x+10, ly = right ? f.y+14 : f.y+16;
+        let t = txt(lx, ly, lab, cls, right?'end':'start');
+        if (key && CFG[key]){
+          const w = tw(lab, 11) + 12;
+          t = `<rect x="${right?lx-w+4:lx-6}" y="${ly-13}" width="${w}" height="18" class="lab-hit" rx="4"/>` + t;
+          s += wrapHit(f, t);
+        } else s += t;
       }
     });
     const labels = [];
@@ -135,7 +171,7 @@
       const f = D.frames.find(x => x.id===id && shown(x)); if (!f) return;
       s += box(f.x,f.y,f.w,f.h,'down-ov',8) + txt(f.x+f.w/2, f.y+f.h/2, '✕ '+(F.zoneLabel||'장애'), 'lab-fail', 'middle');
     });
-    $('diagram').innerHTML = s;
+    svg.innerHTML = s;
 
     $('figTitle').innerHTML = `<span class="vtag">${NAMES[vendor]}</span>${esc(pv(S.region)||'')}`;
     const eff = $('effects');
@@ -144,8 +180,79 @@
     const fb = $('failBtn');
     if (fb){ fb.setAttribute('aria-pressed', failed); fb.textContent = failed ? (F.restore||'복구') : F.button; }
     const used = [...new Set(nodes.map(o=>pv(o.icon)).filter(Boolean))];
+    renderInsp();
     $('legend').innerHTML = used.map(k=>`<span>${CloudIcons.tile(k, vendor)}${esc(LEGEND[k]||k)}</span>`).join('');
   }
+
+  /* ---------- 설정 보기 ---------- */
+  function findObj(id){ const D = pv(S.diagram); return D.nodes.find(o=>o.id===id) || D.frames.find(f=>f.id===id); }
+  function cfgHTML(key, why, closeId){
+    const C = CFG[key]; if (!C) return '';
+    const c = C[vendor] || {};
+    const list = a => (a||[]).map(x=>`<li>${esc(x)}</li>`).join('');
+    return `<div class="ih"><div><span class="vtag">${NAMES[vendor]}</span><b class="nm">${esc(c.name)}</b>${c.auto?'<span class="auto">직접 만들지 않음</span>':''}<span class="ttl">${esc(C.title)}</span></div>
+      ${closeId?`<button type="button" class="btn sm" data-close="${closeId}" aria-label="설정 닫기">닫기</button>`:''}</div>
+      <dl class="where"><div><dt>설정 범위</dt><dd>${esc(c.scope)}</dd></div><div><dt>만드는 위치</dt><dd>${esc(c.where)}</dd></div></dl>
+      ${why?`<p class="why"><b>이 장에서</b> ${esc(why)}</p>`:''}
+      <div class="icols"><div><h4>${c.auto?'동작 방식':'만드는 순서'}</h4><ol class="steps">${list(c.steps)}</ol></div>
+      <div><h4>주요 설정값</h4><div class="tbl in"><table class="cfgt"><thead><tr><th>항목</th><th>예시 값</th><th>설명</th></tr></thead><tbody>${(c.fields||[]).map(f=>`<tr><th scope="row">${esc(f[0])}</th><td class="mono">${esc(f[1])}</td><td>${esc(f[2]||'')}</td></tr>`).join('')}</tbody></table></div>
+      <h4>Terraform 리소스</h4><p class="tf">${(c.tf||[]).map(t=>`<code>${esc(t)}</code>`).join(' ')}</p></div></div>
+      ${c.note?`<p class="inote">${esc(c.note)}</p>`:''}
+      <div class="cmp"><h4>세 클라우드에서는</h4><table><tbody>${['aws','gcp','azure'].map(v=>{ const x=C[v]||{}; return `<tr class="${v===vendor?'on':''}"><th scope="row"><button type="button" class="vbtn v-${v}" data-vendor="${v}" aria-pressed="${v===vendor}">${NAMES[v]}</button></th><td><b>${esc(x.name)}</b>${x.auto?' <span class="auto">자동</span>':''}</td><td>${esc(x.scope)}</td></tr>`; }).join('')}</tbody></table></div>`;
+  }
+  function renderInsp(){
+    const el = $('insp'); if (!el) return;
+    if (!sel || !sel.id || sel.from!=='fig'){ el.hidden = true; return; }
+    const o = findObj(sel.id);
+    const key = o ? pv(o.cfg) : sel.key;
+    if (!key || !CFG[key]){ el.hidden = true; return; }
+    el.hidden = false; el.innerHTML = cfgHTML(key, o && pv(o.why), 'insp');
+  }
+  function renderBuild(){
+    const el = $('buildCols'); if (!el) return;
+    const st = (v,b) => { const c = b.cfg && CFG[b.cfg] && CFG[b.cfg][v]; return c ? c : null; };
+    const st2 = $('scopeTable');
+    if (st2) st2.innerHTML = `<thead><tr><th scope="col">설정</th>${['aws','gcp','azure'].map(v=>`<th scope="col" class="v-${v} ${v===vendor?'on':''}">${NAMES[v]}</th>`).join('')}</tr></thead><tbody>${
+      S.scope.filter(k=>CFG[k]).map(k=>`<tr><th scope="row">${esc(CFG[k].title)}</th>${['aws','gcp','azure'].map(v=>{ const c=CFG[k][v]||{}; const on = sel&&sel.from==='build'&&sel.key===k&&v===vendor;
+        return `<td class="${v===vendor?'on':''} ${on?'cur':''}"><button type="button" class="cell" data-key="${k}" data-v="${v}">${esc(c.name)}${c.auto?' <span class="auto">자동</span>':''}<span class="k">${esc(c.scope)}</span></button></td>`; }).join('')}</tr>`).join('')}</tbody>`;
+    el.innerHTML = ['aws','gcp','azure'].map(v=>{ const L = S.build[v]||[]; const mk = L.filter(b=>{ const c=st(v,b); return !(b.auto || (c&&c.auto)); }).length;
+      return `<div class="bcol v-${v} ${v===vendor?'on':''}"><h3><span class="dot"></span>${NAMES[v]}<small>${L.length}단계 · 직접 만드는 단계 ${mk}</small></h3><ol>${L.map((b,i)=>{ const c=st(v,b); const auto = b.auto || (c&&c.auto);
+        const on = !!(sel&&sel.from==='build'&&sel.v===v&&sel.i===i);
+        return `<li class="${auto?'isauto':''} ${on?'cur':''}"><button type="button" class="step" data-v="${v}" data-i="${i}" aria-pressed="${on}"><span class="no">${i+1}</span><span class="bt"><b>${esc(b.t)}</b>${b.d?`<span>${esc(b.d)}</span>`:''}${c?`<em>${esc(b.scope||c.scope)}</em>`:''}</span></button></li>`; }).join('')}</ol></div>`; }).join('');
+    const p = $('bInsp');
+    if (sel && sel.from==='build' && CFG[sel.key]){
+      const b = sel.i!=null ? (S.build[vendor]||[])[sel.i] : null;
+      p.hidden = false;
+      p.innerHTML = (b?`<p class="bstep"><span class="no">${sel.i+1}</span>${esc(b.t)}${b.nodes&&b.nodes.length?` <button type="button" class="btn sm" data-show="1">도면에서 위치 보기</button>`:''}</p>`:'') + cfgHTML(sel.key, b && b.why, 'bInsp');
+    } else if (sel && sel.from==='build' && sel.i!=null){
+      const b = (S.build[vendor]||[])[sel.i];
+      p.hidden = false; p.innerHTML = `<p class="bstep"><span class="no">${sel.i+1}</span>${esc(b.t)} <button type="button" class="btn sm" data-close="bInsp">닫기</button></p>${b.d?`<p>${esc(b.d)}</p>`:''}`;
+    } else p.hidden = true;
+  }
+  function pick(next){ sel = next; hl = new Set(next && next.nodes || []); render(); renderBuild(); }
+  function onDiagram(e){
+    const g = e.target.closest('[data-cfg]'); if (!g) return;
+    if (e.type==='keydown' && e.key!=='Enter' && e.key!==' ') return;
+    e.preventDefault();
+    const id = g.dataset.id;
+    if (sel && sel.id===id && sel.from==='fig'){ pick(null); return; }
+    pick({id, key:g.dataset.cfg, from:'fig'});
+    const p = $('insp'); if (p && p.scrollIntoView) p.scrollIntoView({block:'nearest', behavior:'smooth'});
+    const again = document.querySelector(`#diagram [data-id="${CSS.escape(id)}"]`); if (again && e.type==='keydown') again.focus();
+  }
+  document.addEventListener('click', e=>{
+    const c = e.target.closest('[data-close]'); if (c){ pick(null); return; }
+    const vb = e.target.closest('.insp [data-vendor]'); if (vb){ setVendor(vb.dataset.vendor); return; }
+    const sh = e.target.closest('[data-show]');
+    if (sh){ hl = new Set(((S.build[vendor]||[])[sel.i]||{}).nodes||[]); render(); $('arch').scrollIntoView({behavior:'smooth'}); return; }
+    const cell = e.target.closest('#scopeTable .cell');
+    if (cell){ if (cell.dataset.v!==vendor) setVendor(cell.dataset.v); pick({key:cell.dataset.key, from:'build'}); return; }
+    const stp = e.target.closest('#buildCols .step');
+    if (stp){ const v = stp.dataset.v, i = +stp.dataset.i;
+      if (sel && sel.from==='build' && sel.v===v && sel.i===i){ pick(null); return; }
+      if (v!==vendor) setVendor(v);
+      const b = S.build[v][i]; pick({key:b.cfg, from:'build', v, i, nodes:b.nodes}); }
+  });
 
   /* ---------- 매핑표 ---------- */
   function renderMap(){
@@ -167,7 +274,7 @@
   }
 
   /* ---------- 코드 ---------- */
-  function hl(src){
+  function hilite(src){
     return esc(src).split('\n').map(l=>{
       const i = l.indexOf('#'); let a = i>=0 ? l.slice(0,i) : l; const c = i>=0 ? l.slice(i) : '';
       a = a.replace(/"([^"]*)"/g,'<span class="s">"$1"</span>');
@@ -178,7 +285,7 @@
     if (!S.iac) return;
     $('codeName').textContent = `${S.iac}/${vendor}/main.tf`;
     const c = CODE[vendor];
-    $('codeBox').innerHTML = c==null ? '불러오는 중…' : c===false ? '<span class="s">Terraform 파일을 불러오지 못했습니다. 저장소 루트에서 python3 -m http.server로 열어 주세요.</span>' : hl(c);
+    $('codeBox').innerHTML = c==null ? '불러오는 중…' : c===false ? '<span class="s">Terraform 파일을 불러오지 못했습니다. 저장소 루트에서 python3 -m http.server로 열어 주세요.</span>' : hilite(c);
   }
 
   /* ---------- 점검표 ---------- */
@@ -194,10 +301,12 @@
     vendor = v; document.body.dataset.vendor = v;
     try{ localStorage.setItem('archbook-vendor', v); }catch(e){}
     document.querySelectorAll('#vendorSeg button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===v));
-    render(); renderMap(); renderDec(); renderCode();
+    if (sel && sel.from==='build' && sel.i!=null && sel.v!==v){ const b=(S.build[v]||[]).find(x=>x.cfg===sel.key); sel = b ? {key:b.cfg, from:'build', v, i:S.build[v].indexOf(b), nodes:b.nodes} : {key:sel.key, from:'build'}; hl = new Set(sel.nodes||[]); }
+    render(); renderMap(); renderDec(); renderCode(); renderBuild();
     if (window.CloudSims) CloudSims.vendorChanged(v);
   }
   document.querySelectorAll('#vendorSeg button').forEach(b=>b.addEventListener('click',()=>setVendor(b.dataset.v)));
+  $('diagram').addEventListener('click', onDiagram); $('diagram').addEventListener('keydown', onDiagram);
   const fb = $('failBtn'); if (fb) fb.addEventListener('click',()=>{ failed = !failed; render(); });
   const cb = $('copyBtn');
   if (cb) cb.addEventListener('click', e=>{

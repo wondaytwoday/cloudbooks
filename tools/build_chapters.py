@@ -2,7 +2,7 @@
 """archbook/data/scenarios.json에 file이 있는 시나리오마다 챕터 HTML 껍데기를 만든다.
 
 챕터 본문은 같은 이름의 .data.js(window.SCENARIO)에 쓰고, 이 스크립트는 HTML만 생성한다.
-01-three-tier처럼 손으로 만든 챕터는 data.js가 없으므로 건드리지 않는다.
+data.js가 없는 챕터는 건드리지 않는다.
 """
 import json
 from pathlib import Path
@@ -34,6 +34,7 @@ TEMPLATE = """<!doctype html>
   </div>
 </div>
 <main class="wrap" id="chapter"></main>
+<script src="../../shared/data/configs.js"></script>
 <script src="{stem}.data.js"></script>
 <script src="../../shared/js/sims.js"></script>
 <script src="../../shared/js/scenario.js"></script>

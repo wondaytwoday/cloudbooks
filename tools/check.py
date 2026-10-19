@@ -143,14 +143,26 @@ def check_scenario_data():
         for icon in re.findall(r"icon:'([a-z0-9]+)'", text) + re.findall(r"(?:aws|gcp|azure):'([a-z0-9]+)'\}", text):
             if icon not in ICON_KEYS and len(icon) < 10:
                 pass  # 표시 문자열과 섞여 있어 아이콘 키만 엄격히 검사하지 않음
-        iac = re.search(r"iac: '([^']+)'", text)
+        iac = re.search(r"^  iac: '([^']+)'", text, re.M)
         if iac:
             for v in ("aws", "gcp", "azure"):
                 if not (ROOT / iac.group(1) / v / "main.tf").exists():
                     errors.append(f"{p.name}: {iac.group(1)}/{v}/main.tf 없음")
 
 
+def check_scenario_structure():
+    import shutil, subprocess
+    if not shutil.which("node"):
+        warnings.append("node가 없어 시나리오 구조 검사(tools/check_scenarios.js)를 건너뜀")
+        return
+    r = subprocess.run(["node", str(ROOT / "tools/check_scenarios.js")], capture_output=True, text=True)
+    for line in (r.stdout + r.stderr).splitlines():
+        if line.strip():
+            errors.append(line.removeprefix("오류: "))
+
+
 def main():
+    check_scenario_structure()
     check_vendorbooks()
     check_scenario_data()
     check_services()
