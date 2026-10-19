@@ -685,6 +685,474 @@
         "name": "Durable Functions · Logic Apps",
         "scope": ""
       }
+    },
+    {
+      "id": "dedicated-link",
+      "role": "전용선",
+      "icon": "dedicated",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Direct Connect",
+        "scope": "위치 2곳 × 연결 2개 권장"
+      },
+      "gcp": {
+        "name": "Cloud Interconnect",
+        "scope": "Dedicated · Partner"
+      },
+      "azure": {
+        "name": "ExpressRoute",
+        "scope": "회선당 주·보조 연결"
+      }
+    },
+    {
+      "id": "site-vpn",
+      "role": "사이트 간 VPN",
+      "icon": "vpn",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Site-to-Site VPN",
+        "scope": "터널당 최대 1.25Gbps"
+      },
+      "gcp": {
+        "name": "HA VPN",
+        "scope": "99.99% 구성 가능"
+      },
+      "azure": {
+        "name": "VPN Gateway",
+        "scope": "SKU별 처리량"
+      }
+    },
+    {
+      "id": "hybrid-dns",
+      "role": "하이브리드 DNS",
+      "icon": "dns",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Route 53 Resolver 엔드포인트",
+        "scope": "인바운드 · 아웃바운드"
+      },
+      "gcp": {
+        "name": "Cloud DNS 전달 영역 · 서버 정책",
+        "scope": ""
+      },
+      "azure": {
+        "name": "DNS Private Resolver",
+        "scope": "전달 규칙 집합"
+      }
+    },
+    {
+      "id": "bulk-transfer",
+      "role": "대량 데이터 이전",
+      "icon": "obj",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "DataSync · Snowball",
+        "scope": "온라인 · 오프라인"
+      },
+      "gcp": {
+        "name": "Storage Transfer Service · Transfer Appliance",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Storage Mover · Data Box",
+        "scope": ""
+      }
+    },
+    {
+      "id": "cdc-replication",
+      "role": "DB 변경 복제 (CDC)",
+      "icon": "etl",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Database Migration Service",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Datastream",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Data Factory CDC · Fabric 미러링",
+        "scope": ""
+      }
+    },
+    {
+      "id": "stream-ingest",
+      "role": "스트림 적재",
+      "icon": "stream",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Data Firehose",
+        "scope": "S3 등으로 배치 적재"
+      },
+      "gcp": {
+        "name": "Pub/Sub BigQuery 구독",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Event Hubs Capture",
+        "scope": ""
+      }
+    },
+    {
+      "id": "data-lake-storage",
+      "role": "레이크 저장소",
+      "icon": "obj",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "S3",
+        "scope": "Iceberg · Parquet"
+      },
+      "gcp": {
+        "name": "Cloud Storage · BigQuery 관리 저장",
+        "scope": "BigLake 테이블"
+      },
+      "azure": {
+        "name": "ADLS Gen2",
+        "scope": "계층형 네임스페이스"
+      }
+    },
+    {
+      "id": "etl-transform",
+      "role": "변환",
+      "icon": "etl",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "AWS Glue",
+        "scope": "Spark 잡"
+      },
+      "gcp": {
+        "name": "Dataflow · Dataform",
+        "scope": "Beam · SQL"
+      },
+      "azure": {
+        "name": "Data Factory · Synapse Spark",
+        "scope": ""
+      }
+    },
+    {
+      "id": "data-catalog",
+      "role": "카탈로그·열 권한",
+      "icon": "lakegov",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Glue Data Catalog · Lake Formation",
+        "scope": "테이블·열·행 권한"
+      },
+      "gcp": {
+        "name": "Dataplex · 정책 태그",
+        "scope": "열 수준 보안"
+      },
+      "azure": {
+        "name": "Microsoft Purview",
+        "scope": "분류 · 계보"
+      }
+    },
+    {
+      "id": "sql-analytics",
+      "role": "분석 SQL 엔진",
+      "icon": "query",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Athena · Redshift",
+        "scope": "스캔량 과금 · 서버리스"
+      },
+      "gcp": {
+        "name": "BigQuery",
+        "scope": "처리 바이트 또는 슬롯"
+      },
+      "azure": {
+        "name": "Synapse 서버리스 SQL · Fabric",
+        "scope": "처리량 과금"
+      }
+    },
+    {
+      "id": "orchestration",
+      "role": "데이터 파이프라인 일정",
+      "icon": "workflow",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "MWAA (Airflow)",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cloud Composer (Airflow)",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Data Factory 파이프라인",
+        "scope": ""
+      }
+    },
+    {
+      "id": "bi",
+      "role": "대시보드",
+      "icon": "query",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "QuickSight",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Looker Studio · Looker",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Power BI",
+        "scope": ""
+      }
+    },
+    {
+      "id": "global-traffic",
+      "role": "전역 트래픽 전환",
+      "icon": "gslb",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Route 53 장애조치 · ARC",
+        "scope": "DNS 기반"
+      },
+      "gcp": {
+        "name": "전역 외부 Application LB",
+        "scope": "Anycast IP 하나"
+      },
+      "azure": {
+        "name": "Front Door · Traffic Manager",
+        "scope": "HTTP · DNS 기반"
+      }
+    },
+    {
+      "id": "cross-region-db",
+      "role": "리전 간 DB 복제",
+      "icon": "db",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Aurora Global Database",
+        "scope": "보통 1초 미만 지연"
+      },
+      "gcp": {
+        "name": "Cloud SQL 교차 리전 복제본 · Spanner",
+        "scope": "Spanner는 동기"
+      },
+      "azure": {
+        "name": "Azure SQL 장애 조치 그룹 · Cosmos DB",
+        "scope": "수신기 이름 유지"
+      }
+    },
+    {
+      "id": "object-replication",
+      "role": "리전 간 파일 복제",
+      "icon": "obj",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "S3 교차 리전 복제",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "이중·멀티 리전 버킷",
+        "scope": "터보 복제 15분 RPO 목표"
+      },
+      "azure": {
+        "name": "GRS · 객체 복제",
+        "scope": "쌍 지역으로 복제"
+      }
+    },
+    {
+      "id": "dr-service",
+      "role": "관리형 재해 복구",
+      "icon": "backup",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Elastic Disaster Recovery",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Backup and DR Service",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure Site Recovery",
+        "scope": ""
+      }
+    },
+    {
+      "id": "private-endpoint",
+      "role": "서비스 비공개 연결",
+      "icon": "privlink",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "VPC 엔드포인트",
+        "scope": "게이트웨이 · 인터페이스"
+      },
+      "gcp": {
+        "name": "Private Service Connect",
+        "scope": "비공개 Google 액세스"
+      },
+      "azure": {
+        "name": "Private Endpoint",
+        "scope": "Private Link"
+      }
+    },
+    {
+      "id": "data-perimeter",
+      "role": "데이터 반출 경계",
+      "icon": "guard",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "엔드포인트·리소스 정책 + SCP 조건 키",
+        "scope": "정책 조합"
+      },
+      "gcp": {
+        "name": "VPC 서비스 제어",
+        "scope": "API 수준 경계"
+      },
+      "azure": {
+        "name": "공용 네트워크 접근 차단 · 네트워크 보안 경계",
+        "scope": "조합"
+      }
+    },
+    {
+      "id": "egress-filter",
+      "role": "인터넷 출구 통제",
+      "icon": "fw",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Network Firewall",
+        "scope": "도메인 목록"
+      },
+      "gcp": {
+        "name": "Secure Web Proxy · Cloud NGFW",
+        "scope": "FQDN 정책"
+      },
+      "azure": {
+        "name": "Azure Firewall",
+        "scope": "애플리케이션 규칙"
+      }
+    },
+    {
+      "id": "kms",
+      "role": "키 관리",
+      "icon": "kms",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "KMS · CloudHSM",
+        "scope": "외부 키 저장소(XKS)"
+      },
+      "gcp": {
+        "name": "Cloud KMS · Cloud HSM",
+        "scope": "Cloud EKM"
+      },
+      "azure": {
+        "name": "Key Vault · Managed HSM",
+        "scope": "제거 보호"
+      }
+    },
+    {
+      "id": "admin-access",
+      "role": "관리자 접속",
+      "icon": "bastion",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Systems Manager Session Manager",
+        "scope": "포트 없음 · 세션 기록"
+      },
+      "gcp": {
+        "name": "IAP TCP 전달 · OS Login",
+        "scope": "외부 IP 없음"
+      },
+      "azure": {
+        "name": "Azure Bastion",
+        "scope": "세션 녹화는 Premium"
+      }
+    },
+    {
+      "id": "immutable-log",
+      "role": "변경 불가 로그 보관",
+      "icon": "audit",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "S3 객체 잠금",
+        "scope": "규정 준수 모드"
+      },
+      "gcp": {
+        "name": "로그 버킷 · 버킷 보존 잠금",
+        "scope": ""
+      },
+      "azure": {
+        "name": "변경 불가 Blob 정책",
+        "scope": ""
+      }
+    },
+    {
+      "id": "compliance",
+      "role": "규정 준수 점검",
+      "icon": "sechub",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Config · Audit Manager",
+        "scope": "적합성 팩"
+      },
+      "gcp": {
+        "name": "Security Command Center · 조직 정책",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure Policy · Defender for Cloud",
+        "scope": "규정 준수 대시보드"
+      }
+    },
+    {
+      "id": "waf-bot",
+      "role": "WAF · 봇 차단",
+      "icon": "waf",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "AWS WAF · Bot Control",
+        "scope": "속도 기반 규칙"
+      },
+      "gcp": {
+        "name": "Cloud Armor",
+        "scope": "속도 제한 · reCAPTCHA 연동"
+      },
+      "azure": {
+        "name": "Front Door WAF",
+        "scope": "봇 관리자 규칙 집합"
+      }
+    },
+    {
+      "id": "waiting-room",
+      "role": "가상 대기실",
+      "icon": "func",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Virtual Waiting Room on AWS",
+        "scope": "솔루션 라이브러리"
+      },
+      "gcp": {
+        "name": "직접 구현",
+        "scope": "Cloud Run + Firestore"
+      },
+      "azure": {
+        "name": "직접 구현",
+        "scope": "Functions + Cosmos DB"
+      }
+    },
+    {
+      "id": "scheduled-scaling",
+      "role": "예약 확장",
+      "icon": "autoscale",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "Auto Scaling 예약 작업 · 웜 풀",
+        "scope": "ALB LCU 예약"
+      },
+      "gcp": {
+        "name": "MIG 확장 일정",
+        "scope": "LB 사전 웜업 불필요"
+      },
+      "azure": {
+        "name": "자동 확장 일정 프로필",
+        "scope": "App Gateway 최소 인스턴스"
+      }
     }
   ]
 }

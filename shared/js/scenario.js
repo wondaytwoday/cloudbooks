@@ -101,7 +101,7 @@
   }
   function render(){
     const D = S.diagram, F = S.fail || {};
-    const nodes = D.nodes.filter(shown), byId = {};
+    const nodes = D.nodes.filter(o => shown(o) && (o.fail!=='show' || failed)), byId = {};
     nodes.forEach(o => byId[o.id] = o);
     const downSet = new Set(failed ? (F.down||[]) : []);
     const promoSet = new Set(failed ? (F.promote||[]) : []);

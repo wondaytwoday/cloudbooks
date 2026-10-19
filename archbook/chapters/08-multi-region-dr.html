@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>멀티 리전 재해 복구 · ArchBook</title>
+<meta name="description" content="RPO·RTO 목표에 맞춰 리전 장애를 대비하려면? AWS·GCP·Azure 설계를 도면과 시뮬레이터로 비교합니다.">
+<link rel="icon" href="../../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@600;700&display=swap">
+<link rel="stylesheet" href="../../shared/css/book.css">
+</head>
+<body data-vendor="aws" data-root="../../">
+<script src="../../shared/js/icons.js"></script>
+<div class="bar" role="region" aria-label="클라우드 선택">
+  <div class="wrap">
+    <a class="lbl" href="../">ArchBook</a><span class="lbl">이 장을 읽을 클라우드</span>
+    <div class="seg" id="vendorSeg">
+      <button type="button" class="v-aws" data-v="aws" aria-pressed="true">AWS</button>
+      <button type="button" class="v-gcp" data-v="gcp" aria-pressed="false">GCP</button>
+      <button type="button" class="v-azure" data-v="azure" aria-pressed="false">Azure</button>
+    </div>
+  </div>
+</div>
+<main class="wrap" id="chapter"></main>
+<script src="08-multi-region-dr.data.js"></script>
+<script src="../../shared/js/sims.js"></script>
+<script src="../../shared/js/scenario.js"></script>
+</body>
+</html>
