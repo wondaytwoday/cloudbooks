@@ -32,6 +32,16 @@ for (const f of fs.readdirSync(path.join(ROOT, 'archbook/chapters')).filter(f =>
     }
   }
   for (const k of S.scope || []) if (!CFG[k]) errs.push(`${f}: 범위표에 없는 설정 키 ${k}`);
+  for (const fl of S.flows || []) for (const v of V) {
+    if (fl.only && !fl.only.includes(v)) continue;
+    const D = pv(S.diagram, v), ids = new Set([...D.nodes, ...D.frames].map(o => o.id));
+    const hops = pv(fl.hops, v);
+    if (!hops || !hops.length) { errs.push(`${f} 경로 ${fl.id}: ${v} 홉 없음`); continue; }
+    for (const h of hops) {
+      if (h.n && !ids.has(h.n)) errs.push(`${f} 경로 ${fl.id} ${v}: 도면에 없는 id ${h.n}`);
+      if (h.cfg && !CFG[h.cfg]) errs.push(`${f} 경로 ${fl.id} ${v}: 없는 설정 키 ${h.cfg}`);
+    }
+  }
 }
 errs.forEach(e => console.log('오류: ' + e));
 process.exit(errs.length ? 1 : 0);

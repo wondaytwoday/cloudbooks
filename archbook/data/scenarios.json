@@ -4,7 +4,8 @@
     "intermediate": "중급",
     "advanced": "고급",
     "synthesis": "종합",
-    "network": "네트워크 설계 실전"
+    "network": "네트워크 설계 실전",
+    "hybrid": "전용선 하이브리드 실전"
   },
   "scenarios": [
     {
@@ -186,6 +187,60 @@
       "file": "chapters/20-private-services.html",
       "title": "관리형 서비스로 가는 비공개 경로",
       "question": "VPC 안에서 스토리지·시크릿·레지스트리를 인터넷 없이 쓰려면?"
+    },
+    {
+      "no": 21,
+      "id": "forced-tunneling",
+      "level": "hybrid",
+      "status": "published",
+      "file": "chapters/21-forced-tunneling.html",
+      "title": "사내 방화벽으로 인터넷 출구 통합",
+      "question": "클라우드의 인터넷 트래픽을 전용선 너머 사내 방화벽으로 보내려면?"
+    },
+    {
+      "no": 22,
+      "id": "dual-link-failover",
+      "level": "hybrid",
+      "status": "published",
+      "file": "chapters/22-dual-link-failover.html",
+      "title": "전용선 이중화와 장애 전환",
+      "question": "회선이 죽으면 어디로 넘어가고, 갈 때와 올 때가 같은 길인가?"
+    },
+    {
+      "no": 23,
+      "id": "onprem-to-managed",
+      "level": "hybrid",
+      "status": "published",
+      "file": "chapters/23-onprem-to-managed.html",
+      "title": "사내 서버가 전용선으로 관리형 서비스 쓰기",
+      "question": "사내 서버가 인터넷 없이 클라우드 스토리지·DB를 쓰려면?"
+    },
+    {
+      "no": 24,
+      "id": "overlapping-cidr",
+      "level": "hybrid",
+      "status": "published",
+      "file": "chapters/24-overlapping-cidr.html",
+      "title": "클라우드 대역이 사내와 겹칠 때",
+      "question": "IP가 겹치는 클라우드와 사내를 re-IP 없이 연결하려면?"
+    },
+    {
+      "no": 25,
+      "id": "multi-region-link",
+      "level": "hybrid",
+      "status": "published",
+      "file": "chapters/25-multi-region-link.html",
+      "title": "전용선 하나로 여러 리전·여러 VPC 연결",
+      "question": "서울 전용선 하나로 도쿄 리전까지 쓰려면?"
+    },
+    {
+      "no": 26,
+      "id": "link-encryption",
+      "level": "hybrid",
+      "status": "published",
+      "file": "chapters/26-link-encryption.html",
+      "title": "전용선 구간 암호화",
+      "question": "전용선 위 데이터도 암호화해야 한다면?"
     }
   ]
 }

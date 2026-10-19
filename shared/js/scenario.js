@@ -29,7 +29,7 @@
   const S = window.SCENARIO;
   const ROOT = document.body.dataset.root || '../../';
   const NAMES = {aws:'AWS', gcp:'GCP', azure:'Azure'};
-  const LEVELS = {basic:'기초', intermediate:'중급', advanced:'고급', synthesis:'종합', network:'네트워크 실전'};
+  const LEVELS = {basic:'기초', intermediate:'중급', advanced:'고급', synthesis:'종합', network:'네트워크 실전', hybrid:'전용선 하이브리드'};
   const LEGEND = {users:'사용자',client:'클라이언트',dns:'DNS',cdn:'CDN',edge:'CDN·WAF',waf:'WAF',lb:'로드밸런서',gslb:'글로벌 트래픽',nat:'NAT',igw:'인터넷 게이트웨이',
     vm:'VM',gpu:'GPU VM',autoscale:'오토스케일',db:'관계형 DB',pg:'PostgreSQL',nosql:'NoSQL',obj:'오브젝트 스토리지',files:'파일 스토리지',cache:'캐시',secret:'시크릿',
     kms:'키 관리',mon:'모니터링',logs:'로그',audit:'감사 로그',net:'가상 네트워크',sub:'서브넷',fw:'방화벽',privlink:'비공개 연결',bastion:'관리 접속',
@@ -133,7 +133,7 @@
   }
   let FP = {on:new Set(), bad:null, hops:[]};
   function flowState(){
-    const f = flow && (S.flows||[]).find(x=>x.id===flow);
+    const f = flow && (S.flows||[]).filter(shown).find(x=>x.id===flow);
     if (!f) return {on:new Set(), bad:null, hops:[]};
     const hops = pv(f.hops) || [];
     const k = hops.findIndex(h=>h.ok===false);
@@ -217,9 +217,9 @@
   function flowOK(f){ const h = pv(f.hops)||[]; return !h.some(x=>x.ok===false); }
   function renderFlows(){
     const L = $('flowList'); if (!L) return;
-    L.innerHTML = S.flows.map(f=>{ const ok = flowOK(f); return `<button type="button" class="flowbtn ${ok?'ok':'no'}" data-flow="${esc(f.id)}" aria-pressed="${flow===f.id}"><span class="fi" aria-hidden="true">${ok?'✓':'✕'}</span>${esc(f.t)}</button>`; }).join('');
+    L.innerHTML = S.flows.filter(shown).map(f=>{ const ok = flowOK(f); return `<button type="button" class="flowbtn ${ok?'ok':'no'}" data-flow="${esc(f.id)}" aria-pressed="${flow===f.id}"><span class="fi" aria-hidden="true">${ok?'✓':'✕'}</span>${esc(f.t)}</button>`; }).join('');
     const P = $('flowPanel');
-    const f = flow && S.flows.find(x=>x.id===flow);
+    const f = flow && S.flows.filter(shown).find(x=>x.id===flow);
     if (!f){ P.hidden = true; return; }
     const st = FP, ok = st.k<0 || st.k==null;
     P.hidden = false;
