@@ -1495,6 +1495,114 @@
         "name": "Bicep · ARM 템플릿",
         "scope": "Terraform은 공통"
       }
+    },
+    {
+      "id": "block-storage",
+      "role": "블록 스토리지",
+      "icon": "files",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "EBS",
+        "scope": "AZ 범위 · 스냅샷은 리전"
+      },
+      "gcp": {
+        "name": "Persistent Disk · Hyperdisk",
+        "scope": "영역 · 리전 디스크"
+      },
+      "azure": {
+        "name": "관리 디스크",
+        "scope": "LRS는 영역 · ZRS 가능"
+      }
+    },
+    {
+      "id": "file-storage",
+      "role": "파일 스토리지",
+      "icon": "files",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "EFS · FSx",
+        "scope": "리전 · 여러 AZ 마운트"
+      },
+      "gcp": {
+        "name": "Filestore",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Azure Files · NetApp Files",
+        "scope": ""
+      }
+    },
+    {
+      "id": "serverless-container",
+      "role": "서버리스 컨테이너",
+      "icon": "run",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "App Runner · ECS Fargate",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cloud Run",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Container Apps",
+        "scope": ""
+      }
+    },
+    {
+      "id": "logs",
+      "role": "로그 저장·분석",
+      "icon": "logs",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "CloudWatch Logs",
+        "scope": "기본 보존 무기한"
+      },
+      "gcp": {
+        "name": "Cloud Logging",
+        "scope": "_Default 30일 · 라우터"
+      },
+      "azure": {
+        "name": "Log Analytics 작업 영역",
+        "scope": "KQL · 테이블별 보존"
+      }
+    },
+    {
+      "id": "apm",
+      "role": "애플리케이션 추적",
+      "icon": "mon",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "X-Ray · Application Signals",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Cloud Trace",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Application Insights",
+        "scope": ""
+      }
+    },
+    {
+      "id": "threat-detection",
+      "role": "위협 탐지",
+      "icon": "sechub",
+      "checked": "2026-10-19",
+      "aws": {
+        "name": "GuardDuty",
+        "scope": ""
+      },
+      "gcp": {
+        "name": "Security Command Center 위협 탐지",
+        "scope": ""
+      },
+      "azure": {
+        "name": "Defender for Cloud 워크로드 보호",
+        "scope": ""
+      }
     }
   ]
 }

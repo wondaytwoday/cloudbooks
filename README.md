@@ -4,10 +4,10 @@
 
 | 책 | 역할 | 상태 |
 | --- | --- | --- |
-| **ArchBook** | 설계 사례집. 시나리오 하나를 세 클라우드에 나란히 설계 | 집필 중 |
-| **AWSBook** | AWS 레퍼런스. 사례집에서 넘어와 깊이 읽는 책 | 집필 예정 |
-| **GCPBook** | Google Cloud 레퍼런스 | 집필 예정 |
-| **AzureBook** | Azure 레퍼런스 | 집필 예정 |
+| **ArchBook** | 설계 사례집. 시나리오 14개를 세 클라우드에 나란히 설계 | 출간 |
+| **AWSBook** | AWS 레퍼런스 13장 | 출간 |
+| **GCPBook** | Google Cloud 레퍼런스 13장 | 출간 |
+| **AzureBook** | Azure 레퍼런스 13장 | 출간 |
 
 ## 실행
 

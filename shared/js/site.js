@@ -35,7 +35,14 @@
     }).catch(() => fail($('toc')));
   }
 
-  if (page === 'vendor'){
+  if (page === 'vendor' && window.VBOOK){
+    $('toc').innerHTML = `<ol class="toc">${VBOOK.chapters.map((c,i) => `
+      <li><a href="chapters/${esc(c.id)}.html"><span class="no">${String(i+1).padStart(2,'0')}</span>
+      <span class="tt"><b>${esc(c.title)}</b><span>${esc(c.lede.split('. ')[0].replace(/\.$/,''))}.</span></span>${tile(c.concepts[0].icon)}</a></li>`).join('')}</ol>`;
+    if (window.CloudIcons) CloudIcons.ready.then(()=>{ document.querySelectorAll('#toc li a').forEach((a,i)=>{ const t=a.querySelector('.tile'); if(t) t.outerHTML = tile(VBOOK.chapters[i].concepts[0].icon); }); });
+  }
+
+  if (page === 'vendor' && !window.VBOOK){
     const v = body.dataset.vendor;
     get('shared/data/vendor-toc.json').then(d => {
       const list = [...d.common, d.unique[v]];

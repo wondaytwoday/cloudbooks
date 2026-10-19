@@ -38,3 +38,25 @@
 
 /* 책장·사례집 목차는 특정 클라우드 색 없이 먹색으로 */
 body[data-page="portal"],body[data-page="archbook"]{--accent:var(--ink);--accent-ink:var(--ink);--accent-soft:var(--grid);--on-accent:var(--sheet)}
+
+/* 벤더 책 챕터 */
+.concepts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:8px}
+.concept{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.concept .ct-h{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.concept .ct-h .tile{width:26px;height:26px;margin:0}
+.concept h3{font-size:16px;margin:0}
+.concept p{font-size:14.5px;margin:0;color:var(--ink)}
+.defaults{padding-left:22px;margin:8px 0 0;display:grid;gap:6px}
+.defaults li{max-width:65ch}
+.defaults li::marker{color:var(--accent-ink);font-family:var(--f-mono);font-weight:500}
+.check.pit li{grid-template-columns:22px 1fr}
+.pit-mark{width:20px;height:20px;border-radius:50%;background:var(--warn-soft);color:var(--warn);font:700 13px var(--f-mono);display:grid;place-items:center;margin-top:3px}
+.check.pit b{display:block}
+.check.pit span:not(.pit-mark){font-size:14.5px;color:var(--muted)}
+.xref{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.xref a{display:grid;grid-template-columns:40px 1fr;gap:10px;align-items:center;background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:var(--ink);text-decoration:none}
+.xref a:hover{border-color:var(--accent-ink)}
+.xref .no{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.xref b{display:block}
+.xref span span{font-size:14px;color:var(--muted)}
+.pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px;font-size:14px}
